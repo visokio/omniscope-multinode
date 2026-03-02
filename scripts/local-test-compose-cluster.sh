@@ -15,8 +15,8 @@
 #
 # Requirements:
 #   - visokio/omniscope:latest pulled (docker pull --platform=linux/amd64 visokio/omniscope:latest)
-#   - Editor licence: cluster-data/editor/licence/Licence.lic
-#   - Viewer licence: cluster-data/viewer/licence/Licence.lic
+#   - Editor licence: any *.lic file in cluster-data/editor/licence/
+#   - Viewer licence: any *.lic file in cluster-data/viewer/licence/
 #
 # cluster-data/ contains only committed bootstrap files (config.xml, serverkey,
 # etc.) and licence placeholders. All runtime state is written to cluster-test/
@@ -103,8 +103,8 @@ dump_cluster_diagnostics() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-EDITOR_LIC="${REPO_ROOT}/cluster-data/editor/licence/Licence.lic"
-VIEWER_LIC="${REPO_ROOT}/cluster-data/viewer/licence/Licence.lic"
+EDITOR_LIC_DIR="${REPO_ROOT}/cluster-data/editor/licence"
+VIEWER_LIC_DIR="${REPO_ROOT}/cluster-data/viewer/licence"
 COMPOSE_FILE="${SCRIPT_DIR}/docker-compose.cluster.yml"
 OMNISCOPE_IMAGE="visokio/omniscope:latest"
 
@@ -112,15 +112,15 @@ OMNISCOPE_IMAGE="visokio/omniscope:latest"
 # Pre-flight checks
 # ------------------------------------------------------------------------------
 
-if [[ ! -f "${EDITOR_LIC}" ]]; then
-  err "Editor licence not found: ${EDITOR_LIC}"
-  err "Place your editor licence (with editor seats) at: cluster-data/editor/licence/Licence.lic"
+if ! find "${EDITOR_LIC_DIR}" -maxdepth 1 -type f -name '*.lic' | grep -q .; then
+  err "Editor licence not found in: ${EDITOR_LIC_DIR}"
+  err "Place your editor licence (with editor seats) in: cluster-data/editor/licence/ (any *.lic filename)"
   exit 1
 fi
 
-if [[ ! -f "${VIEWER_LIC}" ]]; then
-  err "Viewer licence not found: ${VIEWER_LIC}"
-  err "Place your viewer licence (unlimited viewers) at: cluster-data/viewer/licence/Licence.lic"
+if ! find "${VIEWER_LIC_DIR}" -maxdepth 1 -type f -name '*.lic' | grep -q .; then
+  err "Viewer licence not found in: ${VIEWER_LIC_DIR}"
+  err "Place your viewer licence (unlimited viewers) in: cluster-data/viewer/licence/ (any *.lic filename)"
   exit 1
 fi
 
@@ -362,6 +362,8 @@ printf -- '-%.0s' {1..70}; echo
 printf "  VIEWER CLUSTER (OpenResty sticky load balancer: 2 nodes)\n"
 printf -- '-%.0s' {1..70}; echo
 printf "  URL:       http://viewer.localhost:9091\n"
+printf "  Direct:    http://viewer-node-1.localhost:19091 (viewer-1, bypasses LB)\n"
+printf "  Direct:    http://viewer-node-2.localhost:19092 (viewer-2, bypasses LB)\n"
 printf "  Username:  admin\n"
 printf "  Password:  admin1234\n"
 printf "  Logs:      %s logs -f omniscope-viewer-1\n" "${COMPOSE_CMD}"
@@ -393,6 +395,8 @@ printf "  Editor node   http://editor.localhost:9090\n"
 printf "    Client ID:  omniscope-editor\n"
 printf "\n"
 printf "  Viewer nodes  http://viewer.localhost:9091\n"
+printf "    Direct:     http://viewer-node-1.localhost:19091\n"
+printf "    Direct:     http://viewer-node-2.localhost:19092\n"
 printf "    Client ID:  omniscope-viewer\n"
 printf "\n"
 printf "  Roles -> Omniscope permission groups:\n"
@@ -404,8 +408,10 @@ printf -- '-%.0s' {1..70}; echo
 printf "  TEST USERS\n"
 printf -- '-%.0s' {1..70}; echo
 printf "  editor-user   / editor123  -> editor-role  -> http://editor.localhost:9090\n"
+printf "  editor-user-b / editor123  -> editor-role  -> http://editor.localhost:9090\n"
 printf "  viewer-user-a / viewer123  -> viewer-role  -> http://viewer.localhost:9091\n"
 printf "  viewer-user-b / viewer123  -> viewer-role  -> http://viewer.localhost:9091\n"
+printf "  viewer-user-c / viewer123  -> viewer-role  -> http://viewer.localhost:9091\n"
 echo
 
 printf -- '-%.0s' {1..70}; echo

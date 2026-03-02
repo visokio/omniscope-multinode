@@ -26,8 +26,10 @@ keycloak/
 | Editor client | `omniscope-editor` — secret: `omniscope-editor-secret-change-in-production` |
 | Viewer client | `omniscope-viewer` — secret: `omniscope-viewer-secret-change-in-production` |
 | Test editor user | `editor-user` / `editor123` — has `editor-role` |
+| Test editor user B | `editor-user-b` / `editor123` — has `editor-role` |
 | Test viewer user A | `viewer-user-a` / `viewer123` — has `viewer-role` |
 | Test viewer user B | `viewer-user-b` / `viewer123` — has `viewer-role` |
+| Test viewer user C | `viewer-user-c` / `viewer123` — has `viewer-role` |
 
 `realm.json` is only imported once — on first start when the database is empty. After that, all changes should be made in the admin UI and exported back.
 

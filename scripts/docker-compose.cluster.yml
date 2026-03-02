@@ -203,7 +203,12 @@ services:
     labels:
       visokio.cluster: "omniscope"
     networks:
-      - omniscope-net
+      omniscope-net:
+        aliases:
+          # Let containers resolve the editor's external hostname too.
+          # Browsers resolve editor.localhost via RFC 6761 (.localhost = 127.0.0.1).
+          # Containers resolve it via Docker DNS to this service.
+          - editor.localhost
     depends_on:
       keycloak:
         condition: service_healthy
@@ -216,7 +221,7 @@ services:
       JAVA_TOOL_OPTIONS: >-
         -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/editor
     ports:
-      - "9090:8080"
+      - "9090:9090"
     volumes:
       # Editor's own omniscope-server directory (seeded from cluster-data/ bootstrap)
       - type: bind
@@ -249,8 +254,10 @@ services:
   #   - Logs directory (viewer/nodes/node-X/logs/)
   #   - Error reports directory (viewer/nodes/node-X/error reports/)
   #
-  # Viewer nodes are NOT exposed directly to the host — all traffic goes
-  # through OpenResty on port 9091 which handles sticky session routing.
+  # Viewer nodes are reached via OpenResty on port 9091 for normal usage.
+  # For diagnostics, each viewer node is also exposed directly on localhost:
+  #   - viewer-1: http://viewer-node-1.localhost:19091
+  #   - viewer-2: http://viewer-node-2.localhost:19092
   #
   # Access: http://viewer.localhost:9091 (via OpenResty)
   # ============================================================================
@@ -273,6 +280,9 @@ services:
       JAVA_TOOL_OPTIONS: >-
         -Domniscope.nodeType=viewer
         -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-1
+    ports:
+      # Direct node access for debugging (bypasses OpenResty sticky routing).
+      - "127.0.0.1:19091:9090"
     volumes:
       # Shared viewer omniscope-server (seeded from cluster-data/ bootstrap)
       - type: bind
@@ -318,6 +328,9 @@ services:
       JAVA_TOOL_OPTIONS: >-
         -Domniscope.nodeType=viewer
         -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-2
+    ports:
+      # Direct node access for debugging (bypasses OpenResty sticky routing).
+      - "127.0.0.1:19092:9090"
     volumes:
       - type: bind
         source: ${VIEWER_OMNISCOPE_SERVER}
@@ -366,13 +379,16 @@ services:
           # Containers resolve this via Docker DNS → OpenResty → keycloak:80 (internal).
           # Browsers resolve keycloak.localhost via RFC 6761 (.localhost = 127.0.0.1) → port 9900.
           - keycloak.localhost
+          # Also expose the viewer entry hostname on Docker DNS.
+          # This keeps host and container hostname usage consistent.
+          - viewer.localhost
     depends_on:
       - omniscope-viewer-1
       - omniscope-viewer-2
       - keycloak
     ports:
       # Viewer cluster entry point — OpenResty sticky session router
-      - "9091:80"
+      - "9091:9091"
       # Keycloak proxy — keycloak.localhost:9900 → keycloak:80 (internal)
       # Browsers resolve keycloak.localhost natively, no /etc/hosts needed.
       - "9900:9900"

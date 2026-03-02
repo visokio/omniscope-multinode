@@ -81,14 +81,26 @@
         "http://viewer.localhost:9091/oidc-cb",
         "http://viewer.localhost:9091/oidc-locb",
         "http://localhost:9091/oidc-cb",
-        "http://localhost:9091/oidc-locb"
+        "http://localhost:9091/oidc-locb",
+        "http://viewer-node-1.localhost:19091/oidc-cb",
+        "http://viewer-node-1.localhost:19091/oidc-locb",
+        "http://viewer-node-2.localhost:19092/oidc-cb",
+        "http://viewer-node-2.localhost:19092/oidc-locb",
+        "http://localhost:19091/oidc-cb",
+        "http://localhost:19091/oidc-locb",
+        "http://localhost:19092/oidc-cb",
+        "http://localhost:19092/oidc-locb"
       ],
       "webOrigins": [
         "http://viewer.localhost:9091",
-        "http://localhost:9091"
+        "http://localhost:9091",
+        "http://viewer-node-1.localhost:19091",
+        "http://viewer-node-2.localhost:19092",
+        "http://localhost:19091",
+        "http://localhost:19092"
       ],
       "attributes": {
-        "post.logout.redirect.uris": "http://viewer.localhost:9091/*##http://localhost:9091/*"
+        "post.logout.redirect.uris": "http://viewer.localhost:9091/*##http://localhost:9091/*##http://viewer-node-1.localhost:19091/*##http://viewer-node-2.localhost:19092/*##http://localhost:19091/*##http://localhost:19092/*"
       },
       "defaultClientScopes": [
         "openid",
@@ -259,13 +271,32 @@
       ]
     },
     {
+      "username": "editor-user-b",
+      "email": "editor-b@visokio.local",
+      "firstName": "Editor",
+      "lastName": "User B",
+      "enabled": true,
+      "emailVerified": true,
+      "createdTimestamp": 1700000000001,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "editor123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "editor-role"
+      ]
+    },
+    {
       "username": "viewer-user-a",
       "email": "viewer-a@visokio.local",
       "firstName": "Viewer",
       "lastName": "User A",
       "enabled": true,
       "emailVerified": true,
-      "createdTimestamp": 1700000000001,
+      "createdTimestamp": 1700000000002,
       "credentials": [
         {
           "type": "password",
@@ -284,7 +315,26 @@
       "lastName": "User B",
       "enabled": true,
       "emailVerified": true,
-      "createdTimestamp": 1700000000002,
+      "createdTimestamp": 1700000000003,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer-role"
+      ]
+    },
+    {
+      "username": "viewer-user-c",
+      "email": "viewer-c@visokio.local",
+      "firstName": "Viewer",
+      "lastName": "User C",
+      "enabled": true,
+      "emailVerified": true,
+      "createdTimestamp": 1700000000004,
       "credentials": [
         {
           "type": "password",

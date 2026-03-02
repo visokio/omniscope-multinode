@@ -58,6 +58,15 @@ The concepts in this architecture apply regardless of where you host Omniscope �
 
 The `keycloak.localhost` proxy is the most Docker Compose-specific piece of this reference architecture. In a production deployment, your OIDC provider has a public hostname that both browsers and your servers can reach directly with no proxy needed. The workaround exists here because Docker containers and the host browser live in different network namespaces and cannot share a simple `localhost` address.
 
+### Important for working copies (Docker Compose detail)
+
+Working-copy and project-push flows use server-side callbacks. That means Omniscope itself (inside the container), not just your browser, must be able to reach the project URL.
+This follows the recommended architecture principle: use one canonical URL per environment, and make sure that same URL is reachable both externally (browser) and internally (container network).
+
+- If a URL only works from the host browser but is not routable from inside the Docker network, working-copy actions can fail.
+- In this reference setup, use the same externally exposed Omniscope URL/port that is also resolvable inside Docker (`http://editor.localhost:9090` for editor, `http://viewer.localhost:9091` for viewer).
+- Avoid container-local `localhost` assumptions: inside a container, `localhost` means that same container, not your host machine.
+
 ### Two environments, one shared folder
 
 The editor and viewer environments are completely independent Omniscope instances (separate configuration, separate licences, separate user bases) but they share the same underlying projects folder. The editor produces; the viewers consume.
@@ -70,7 +79,7 @@ The editor and viewer environments are completely independent Omniscope instance
 | **Licence** | Editor licence (with editor seats) | Viewer licence (unlimited viewers) |
 | **Config** | `cluster-data/editor/omniscope-server/` | `cluster-data/viewer/omniscope-server/` |
 | **Shared folder** | ✅ Read-write | ✅ Read-write (filesystem level) |
-| **URL** | `editor.localhost:9090` — direct to editor node | `viewer.localhost:9091` — OpenResty entry point |
+| **URL** | `editor.localhost:9090` — direct to editor node | `viewer.localhost:9091` — OpenResty entry point; optional direct node debug URLs: `viewer-node-1.localhost:19091`, `viewer-node-2.localhost:19092` |
 
 > **`-Domniscope.nodeType=viewer` is a mandatory Omniscope requirement, not a Docker detail.** Every viewer node — whether running in Docker, on bare metal, in Kubernetes, or anywhere else — must be started with this JVM flag. It is what tells Omniscope to operate in viewer mode, preventing users from creating or modifying projects at the application level regardless of what the underlying filesystem permits. How you pass it depends on your platform: via a startup script, a system property, or an environment variable. In this reference architecture it is passed through the standard `JAVA_TOOL_OPTIONS` environment variable in the Docker Compose service definition — the JVM picks it up automatically with no custom image or entrypoint script required. If any of your users need to create projects, save new files, or use template-based project creation workflows, they are editors — they need access to an editor node with an appropriate editor licence. This reference architecture does not cover self-service or template-based project creation.
 
@@ -235,7 +244,7 @@ The `Automatic login, always` mode silently checks whether the user already has 
 
 #### How this reference architecture implements it (pre-configured Keycloak)
 
-This reference architecture uses Keycloak running in a container, pre-configured with two OIDC clients. These settings are already applied — they are shown here for reference only. To inspect the live settings, log in as `admin` / `admin1234` on either environment, click the profile icon in the top-right corner, and go to **Edit permissions** on the root folder.
+This reference architecture uses Keycloak running in a container, pre-configured with two OIDC clients. These settings are already applied — they are shown here for reference only. To inspect the live settings, on either environment click **Use alternative login** and log in as `Admin` / `admin1234`, then click the profile icon in the top-right corner and go to **Edit permissions** on the root folder.
 
 | Setting | Editor | Viewer |
 |---|---|---|
@@ -254,7 +263,7 @@ Permissions in Omniscope are assigned to groups, and each group can be backed by
 
 #### How this reference architecture implements it (pre-configured Keycloak roles)
 
-This reference architecture pre-configures two roles in Keycloak and maps them to Omniscope permission groups. To inspect the live settings, log in as `admin` / `admin1234` on either environment, click the profile icon in the top-right corner, and go to **Edit permissions** on the root folder.
+This reference architecture pre-configures two roles in Keycloak and maps them to Omniscope permission groups. To inspect the live settings, on either environment click **Use alternative login** and log in as `Admin` / `admin1234`, then click the profile icon in the top-right corner and go to **Edit permissions** on the root folder.
 
 | Permission group | OIDC role required | Environment |
 |---|---|---|
@@ -366,17 +375,28 @@ This script is designed for **clean-slate testing**. Every time it runs it:
 
 | Environment | URL | Credentials |
 |---|---|---|
-| Editor | <http://editor.localhost:9090> | `admin` / `admin1234` |
-| Viewer | <http://viewer.localhost:9091> | `admin` / `admin1234` |
+| Editor | <http://editor.localhost:9090> | Click **Use alternative login**, then `Admin` / `admin1234` |
+| Viewer | <http://viewer.localhost:9091> | Click **Use alternative login**, then `Admin` / `admin1234` |
 | Keycloak admin console | <http://keycloak.localhost:9900> | `admin` / `admin` |
+
+**Direct node access (debug, bypasses load balancer)**
+
+| Node | URL | Notes |
+|---|---|---|
+| Viewer node 1 | <http://viewer-node-1.localhost:19091> | Direct to `omniscope-viewer-1` (no OpenResty sticky routing) |
+| Viewer node 2 | <http://viewer-node-2.localhost:19092> | Direct to `omniscope-viewer-2` (no OpenResty sticky routing) |
+
+Use these only for debugging node-specific behavior (for example, confirming which node has an issue). Normal user traffic should go through <http://viewer.localhost:9091> so sticky sessions and failover behavior match production architecture.
 
 **Pre-configured test users**
 
 | Username | Password | Logs in to |
 |---|---|---|
 | `editor-user` | `editor123` | Editor — <http://editor.localhost:9090> |
+| `editor-user-b` | `editor123` | Editor — <http://editor.localhost:9090> |
 | `viewer-user-a` | `viewer123` | Viewer — <http://viewer.localhost:9091> |
 | `viewer-user-b` | `viewer123` | Viewer — <http://viewer.localhost:9091> |
+| `viewer-user-c` | `viewer123` | Viewer — <http://viewer.localhost:9091> |
 
 ### 6 — Verify everything is working
 
@@ -384,7 +404,9 @@ The cluster is pre-configured with Keycloak as its OIDC provider. No configurati
 
 **Step 1 — Import and run a project on the editor**
 
-Open <http://editor.localhost:9090> and log in as `admin` / `admin1234`. Keycloak authenticates you automatically. Once inside, you will see `project.ioz` listed on the home screen. Click it to import the project, then open it and execute it and wait for it to finish. The project runs on the editor node.
+Open <http://editor.localhost:9090>, click **Use alternative login**, and log in as `Admin` / `admin1234`. Once inside, you will see `project.ioz` listed on the home screen. Click it to import the project, then open it and execute it and wait for it to finish. The project runs on the editor node.
+
+> **Working-copy URL rule:** If you use features like **Make a Working Copy** or **Project Push**, the link Omniscope uses must be reachable from inside the Docker network as well as from your browser. In this setup, use `http://editor.localhost:9090/...` (not a host-only URL that containers cannot reach).
 
 **Step 2 — Confirm the project is visible on the viewer**
 
@@ -401,7 +423,7 @@ Go to <http://viewer.localhost:9091> in the second browser and log in as `viewer
 
 **Step 4 — Confirm sticky session routing via browser DevTools**
 
-To see which node is serving each session, open browser DevTools (F12) and go to the Network tab. Click any request in the list and inspect its response headers. OpenResty adds an `X-Served-By` header to every proxied response, containing the upstream address of the node that handled the request — for example `omniscope-viewer-1:8080` or `omniscope-viewer-2:8080`.
+To see which node is serving each session, open browser DevTools (F12) and go to the Network tab. Click any request in the list and inspect its response headers. OpenResty adds an `X-Served-By` header to every proxied response, containing the upstream address of the node that handled the request — for example `omniscope-viewer-1:9090` or `omniscope-viewer-2:9090`.
 
 If `viewer-user-a` and `viewer-user-b` show different `X-Served-By` values, they are being served by different nodes and sticky session routing is working correctly.
 
@@ -482,7 +504,7 @@ omniscope-multi-node/
 The default deployment runs **2 viewer nodes**. To add or remove nodes, update these three files consistently:
 
 1. **`scripts/docker-compose.cluster.yml`** — add or remove `omniscope-viewer-N` service blocks
-2. **`cluster-data/nginx/nginx.conf`** — add or remove `upstream viewer_nodeN { server omniscope-viewer-N:8080; }` blocks and update the Lua modulus from `count % 2` to `count % N`
+2. **`cluster-data/nginx/nginx.conf`** — add or remove `upstream viewer_nodeN { server omniscope-viewer-N:9090; }` blocks and update the Lua modulus from `count % 2` to `count % N`
 3. **`scripts/local-test-compose-cluster.sh`** — add or remove `VIEWER_NODE_N_LOGS` and `VIEWER_NODE_N_ERROR_REPORTS` exports and matching `mkdir` calls
 
 Each additional viewer node requires approximately **1 GB RAM**.
