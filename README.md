@@ -54,6 +54,7 @@ The concepts in this architecture apply regardless of where you host Omniscope �
 | **Sticky session load balancer** | ✅ Any load balancer with sticky session support (ALB, nginx, HAProxy, Kubernetes ingress) | **OpenResty (nginx + Lua)** — an open-source, scriptable web server used here to implement cookie-based sticky routing in a single self-contained container |
 | **OIDC / SSO authentication** | ✅ Any OIDC-compliant provider (Entra ID, Okta, Google, AWS Cognito, etc.) | Keycloak running in a container, pre-configured with a test realm |
 | **Single Keycloak hostname for browser + back-channel** | 🐳 Docker Compose-specific workaround | OpenResty also acts as a reverse proxy for Keycloak on port `9900`, with a Docker network DNS alias so containers and browsers resolve the same hostname |
+| **Project data clean-up on viewer nodes** | ✅ Viewer nodes must never clean up project data — data refresh is always initiated by the editor node. Set `projectDormancy="NEVER"` in each viewer node's config. | Pre-configured in `cluster-data/viewer/omniscope-server/config.xml` — no manual change needed. |
 
 The `keycloak.localhost` proxy is the most Docker Compose-specific piece of this reference architecture. In a production deployment, your OIDC provider has a public hostname that both browsers and your servers can reach directly with no proxy needed. The workaround exists here because Docker containers and the host browser live in different network namespaces and cannot share a simple `localhost` address.
 
