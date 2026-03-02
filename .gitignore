@@ -1,0 +1,42 @@
+# Licence files — never commit, always mount at runtime
+*.lic
+cluster-data/editor/licence/
+cluster-data/viewer/licence/
+
+# Omniscope server runtime data — generated on first start, not committed
+# (use ** so individual files can be un-ignored below)
+cluster-data/editor/omniscope-server/**
+cluster-data/viewer/omniscope-server/**
+# viewer/nodes/ no longer exists — per-node logs go into tmp/ (set by launch script)
+
+# Commit these bootstrap files — they are generated once and should not change
+!cluster-data/editor/omniscope-server/config.xml
+!cluster-data/viewer/omniscope-server/config.xml
+!cluster-data/editor/omniscope-server/serverkey
+!cluster-data/viewer/omniscope-server/serverkey
+!cluster-data/editor/omniscope-server/.first_run_done
+!cluster-data/viewer/omniscope-server/.first_run_done
+!cluster-data/editor/omniscope-server/keystore.jks.default
+!cluster-data/viewer/omniscope-server/keystore.jks.default
+!cluster-data/editor/omniscope-server/profiles/
+!cluster-data/editor/omniscope-server/profiles/**
+!cluster-data/viewer/omniscope-server/profiles/
+!cluster-data/viewer/omniscope-server/profiles/**
+
+# Keycloak runtime data lives in tmp/ — only realm-export/realm.json is committed
+
+# Shared bootstrap projects should never include runtime temp artifacts
+cluster-data/shared/files/.tmp/
+
+# Keep empty placeholder files so git tracks the folder structure
+!**/.gitkeep
+!**/README.md
+
+# macOS
+.DS_Store
+
+# Temporary test output (created by local-test-compose-cluster.sh)
+cluster-test/
+
+# Claude Code local settings
+.claude/

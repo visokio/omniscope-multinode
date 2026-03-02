@@ -1,0 +1,384 @@
+# ==============================================================================
+# Visokio Omniscope — Multi-Node Cluster
+# ==============================================================================
+#
+# ARCHITECTURE OVERVIEW
+# ---------------------
+#
+#   ┌─────────────────────────────────────────────────────────────┐
+#   │                  EDITOR CLUSTER                             │
+#   │   omniscope-editor (port 9090)                              │
+#   │   - Full read/write access                                  │
+#   │   - Workflow execution enabled                              │
+#   │   - Uses cluster-data/editor/omniscope-server/              │
+#   │   - Uses cluster-data/editor/licence/Licence.lic            │
+#   └──────────────────────────┬──────────────────────────────────┘
+#                              │ shared files (read-write)
+#                              │ cluster-test/shared/files/ (seeded from cluster-data/)
+#                              │
+#   ┌──────────────────────────┴──────────────────────────────────┐
+#   │                  VIEWER CLUSTER                             │
+#   │   openresty (port 9091) — sticky load balancer              │
+#   │     ├── omniscope-viewer-1                                  │
+#   │     └── omniscope-viewer-2                                  │
+#   │   - Read-only mode via JVM flag (-Domniscope.nodeType=viewer)│
+#   │   - Shared omniscope-server config across all viewer nodes  │
+#   │   - Per-node logs in cluster-test/ (ephemeral, set by launch script) │
+#   │   - Uses cluster-data/viewer/licence/Licence.lic            │
+#   └─────────────────────────────────────────────────────────────┘
+#
+#   ┌─────────────────────────────────────────────────────────────┐
+#   │              SHARED INFRASTRUCTURE                          │
+#   │   keycloak (port 9900) — OIDC/SSO authentication           │
+#   │   keycloak-db           — Keycloak's internal PostgreSQL    │
+#   └─────────────────────────────────────────────────────────────┘
+#
+# PORTS
+# -----
+#   9090  Editor cluster  (direct, no load balancer)
+#   9091  Viewer cluster  (via OpenResty, sticky sessions)
+#   9900  Keycloak        (authentication, browser redirects)
+#
+# FOLDER STRUCTURE
+# ----------------
+#   cluster-data/                        Committed to git — bootstrap + config only
+#     editor/omniscope-server/           Bootstrap files (config.xml, serverkey, etc.)
+#     editor/licence/Licence.lic         Editor licence (gitignored, place manually)
+#     viewer/omniscope-server/           Bootstrap files shared across all viewer nodes
+#     viewer/licence/Licence.lic         Viewer licence (gitignored, place manually)
+#     keycloak/realm-export/realm.json   Realm bootstrap — version controlled
+#     nginx/nginx.conf                   OpenResty config (sticky routing + Keycloak proxy)
+#
+#   cluster-test/                        Full runtime environment — destroyed by cluster-test/delete.sh
+#     editor/omniscope-server/           Seeded from cluster-data/, runtime writes here
+#     viewer/omniscope-server/           Seeded from cluster-data/, runtime writes here
+#     viewer/nodes/node-{1,2}/logs/      Per-node logs
+#     viewer/nodes/node-{1,2}/error reports/  Per-node error reports
+#     shared/files/                      Shared projects (editor + all viewers)
+#     shared/files/.tmp/                 JVM temp dir (inside files/ mount)
+#     keycloak/data/                     Keycloak PostgreSQL DB (rebuilt from realm.json)
+#
+# HOW TO RUN
+# ----------
+#   ./scripts/local-test-compose-cluster.sh
+#
+# This script seeds cluster-test/ from cluster-data/, starts all containers,
+# and prints a summary of URLs and commands. See the script for full details.
+#
+# LICENCE FILES
+# -------------
+#   You need TWO separate licence files:
+#     cluster-data/editor/licence/Licence.lic   — Editor licence (with editor seats)
+#     cluster-data/viewer/licence/Licence.lic   — Viewer licence (unlimited viewers)
+#   Both are gitignored. See cluster-data/editor/licence/README.md for details.
+#
+# FIRST RUN
+# ---------
+#   Admin password is pre-set to admin1234 via the committed config.xml bootstrap files.
+#   The launcher script prints the exact docker compose commands to follow logs.
+#
+# ==============================================================================
+
+networks:
+  # Single network connecting all services. All containers can reach each other
+  # by their service name (e.g. keycloak, omniscope-editor, omniscope-viewer-1).
+  omniscope-net:
+    driver: bridge
+
+services:
+
+  # ============================================================================
+  # KEYCLOAK DATABASE
+  # Internal only — not exposed to host. Keycloak uses this for persistence.
+  # All Keycloak config (realms, users, clients) is stored here and survives
+  # container restarts.
+  # ============================================================================
+  keycloak-db:
+    image: postgres:15-alpine
+    labels:
+      visokio.cluster: "omniscope"
+    networks:
+      - omniscope-net
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak-db-password   # Internal only, not exposed
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - type: bind
+        source: ${KEYCLOAK_DATA}
+        target: /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================================
+  # KEYCLOAK — OIDC / SSO AUTHENTICATION SERVER
+  #
+  # Keycloak listens on port 80 internally and is NOT exposed directly to the host.
+  # All access goes via OpenResty, which proxies keycloak.localhost:9900 → keycloak:80.
+  # This gives both the browser and Omniscope containers a single shared hostname.
+  # See the nginx service below and the README for a full explanation.
+  #
+  # On first start, Keycloak imports realm-export/realm.json which contains:
+  #   - Realm: "visokio"
+  #   - Two OIDC clients: omniscope-editor and omniscope-viewer
+  #   - Roles: editor-role and viewer-role
+  #   - Test users pre-configured and ready to use
+  #
+  # Admin console: http://keycloak.localhost:9900 (admin / admin)
+  # ============================================================================
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    labels:
+      visokio.cluster: "omniscope"
+    networks:
+      - omniscope-net
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    environment:
+      # Admin credentials for the Keycloak admin console
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+      # Database connection
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak-db-password
+
+      # Allow HTTP (no TLS) for local development
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+
+      # Keycloak listens on port 80 internally. It is NOT exposed directly to the
+      # host. All traffic (browser and container) reaches Keycloak via OpenResty
+      # at keycloak.localhost:9900, which proxies to keycloak:80 on the internal
+      # Docker network. Browsers resolve keycloak.localhost via RFC 6761 natively.
+      KC_HTTP_PORT: "80"
+      KC_HOSTNAME: "keycloak.localhost"
+      KC_HOSTNAME_PORT: "9900"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+
+    volumes:
+      # Pre-configured realm is auto-imported on first start via --import-realm
+      - type: bind
+        source: ../cluster-data/keycloak/realm-export
+        target: /opt/keycloak/data/import
+        read_only: true
+
+    command:
+      - start-dev
+      - --import-realm
+      - --health-enabled=true
+
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/80'"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================================================
+  # EDITOR NODE — Single node, full read/write access
+  #
+  # - Exposed directly on port 9090 (no OpenResty in front)
+  # - Full workflow execution enabled
+  # - Has its own omniscope-server directory (editor/omniscope-server/)
+  # - Shares the files/ folder with the viewer cluster
+  # - Uses its own licence (editor/licence/Licence.lic)
+  # - Uses JAVA_TOOL_OPTIONS only for java.io.tmpdir (no nodeType viewer flag)
+  #
+  # Access: http://editor.localhost:9090
+  # ============================================================================
+  omniscope-editor:
+    platform: linux/amd64
+    image: visokio/omniscope:latest
+    labels:
+      visokio.cluster: "omniscope"
+    networks:
+      - omniscope-net
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      # Pass JVM args via JAVA_TOOL_OPTIONS so the JVM applies them on startup.
+      # This works with the current upstream image/entrypoint without customization.
+      # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
+      # Keep temp files inside the shared files/ mount.
+      # Use a dedicated subdir so editor temp files are isolated from viewer nodes.
+      JAVA_TOOL_OPTIONS: >-
+        -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/editor
+    ports:
+      - "9090:8080"
+    volumes:
+      # Editor's own omniscope-server directory (seeded from cluster-data/ bootstrap)
+      - type: bind
+        source: ${EDITOR_OMNISCOPE_SERVER}
+        target: /home/omniscope/omniscope-server
+
+      # Shared projects directory only (includes files/.tmp JVM temp dir).
+      - type: bind
+        source: ${SHARED_FILES_DIR}
+        target: /home/omniscope/omniscope-server/files
+
+      # Editor cluster licence file
+      - type: bind
+        source: ../cluster-data/editor/licence
+        target: /home/omniscope/.visokioappdata/Visokio/Omniscope/licenses
+        read_only: true
+
+    restart: unless-stopped
+
+  # ============================================================================
+  # VIEWER NODES — Two nodes, read-only, behind OpenResty (sticky session routing)
+  #
+  # Both viewer nodes share:
+  #   - The same omniscope-server config (cluster-data/viewer/omniscope-server/)
+  #   - The same shared files folder (cluster-test/shared/files/ seeded from cluster-data/)
+  #   - The same viewer licence (cluster-data/viewer/licence/Licence.lic)
+  #   - The same JVM flag: -Domniscope.nodeType=viewer (read-only mode)
+  #
+  # Each viewer node has its own:
+  #   - Logs directory (viewer/nodes/node-X/logs/)
+  #   - Error reports directory (viewer/nodes/node-X/error reports/)
+  #
+  # Viewer nodes are NOT exposed directly to the host — all traffic goes
+  # through OpenResty on port 9091 which handles sticky session routing.
+  #
+  # Access: http://viewer.localhost:9091 (via OpenResty)
+  # ============================================================================
+  omniscope-viewer-1:
+    platform: linux/amd64
+    image: visokio/omniscope:latest
+    labels:
+      visokio.cluster: "omniscope"
+    networks:
+      - omniscope-net
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      # Pass JVM args via JAVA_TOOL_OPTIONS so the JVM applies them on startup.
+      # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
+      # Viewer mode.
+      # Keep tmp inside files/ so atomic rename() stays within the same mount.
+      # Use a per-node tmp subdir to isolate temp artifacts across viewer nodes.
+      JAVA_TOOL_OPTIONS: >-
+        -Domniscope.nodeType=viewer
+        -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-1
+    volumes:
+      # Shared viewer omniscope-server (seeded from cluster-data/ bootstrap)
+      - type: bind
+        source: ${VIEWER_OMNISCOPE_SERVER}
+        target: /home/omniscope/omniscope-server
+
+      # Per-node logs — each viewer node gets its own logs directory
+      - type: bind
+        source: ${VIEWER_NODE_1_LOGS}
+        target: /home/omniscope/omniscope-server/logs
+
+      # Per-node error reports from container home (/home/omniscope/Visokio Error Reports)
+      - type: bind
+        source: ${VIEWER_NODE_1_ERROR_REPORTS}
+        target: "/home/omniscope/Visokio Error Reports"
+
+      # Shared projects directory only.
+      - type: bind
+        source: ${SHARED_FILES_DIR}
+        target: /home/omniscope/omniscope-server/files
+
+      # Viewer cluster licence file (shared across all viewer nodes)
+      - type: bind
+        source: ../cluster-data/viewer/licence
+        target: /home/omniscope/.visokioappdata/Visokio/Omniscope/licenses
+        read_only: true
+
+    restart: unless-stopped
+
+  omniscope-viewer-2:
+    platform: linux/amd64
+    image: visokio/omniscope:latest
+    labels:
+      visokio.cluster: "omniscope"
+    networks:
+      - omniscope-net
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      # Pass JVM args via JAVA_TOOL_OPTIONS so the JVM applies them on startup.
+      # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
+      JAVA_TOOL_OPTIONS: >-
+        -Domniscope.nodeType=viewer
+        -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-2
+    volumes:
+      - type: bind
+        source: ${VIEWER_OMNISCOPE_SERVER}
+        target: /home/omniscope/omniscope-server
+      - type: bind
+        source: ${VIEWER_NODE_2_LOGS}
+        target: /home/omniscope/omniscope-server/logs
+      - type: bind
+        source: ${VIEWER_NODE_2_ERROR_REPORTS}
+        target: "/home/omniscope/Visokio Error Reports"
+      - type: bind
+        source: ${SHARED_FILES_DIR}
+        target: /home/omniscope/omniscope-server/files
+      - type: bind
+        source: ../cluster-data/viewer/licence
+        target: /home/omniscope/.visokioappdata/Visokio/Omniscope/licenses
+        read_only: true
+    restart: unless-stopped
+
+  # ============================================================================
+  # OPENRESTY — Dual-role reverse proxy (nginx + Lua)
+  #
+  # Role 1 — Keycloak proxy (port 9900):
+  #   Exposes Keycloak under the hostname keycloak.localhost:9900.
+  #   Browsers resolve keycloak.localhost natively via RFC 6761 (.localhost = 127.0.0.1).
+  #   Omniscope containers reach the same hostname via the Docker DNS alias below.
+  #   Keycloak itself is NOT exposed directly to the host — only OpenResty is.
+  #   This gives every caller (browser and container) a single shared issuer URI.
+  #
+  # Role 2 — Viewer sticky session router (port 9091):
+  #   Routes viewer traffic across 2 Omniscope viewer nodes using Lua cookie routing.
+  #   On first request, sets OMNI_ROUTE cookie to pin the browser to a specific node.
+  #   All subsequent requests (XHR, API, OIDC callbacks) are routed to the same node.
+  #
+  # Viewer access:   http://viewer.localhost:9091
+  # Keycloak access: http://keycloak.localhost:9900
+  # ============================================================================
+  nginx:
+    image: openresty/openresty:alpine
+    labels:
+      visokio.cluster: "omniscope"
+    networks:
+      omniscope-net:
+        aliases:
+          # Registers OpenResty as "keycloak.localhost" on the Docker network.
+          # Containers resolve this via Docker DNS → OpenResty → keycloak:80 (internal).
+          # Browsers resolve keycloak.localhost via RFC 6761 (.localhost = 127.0.0.1) → port 9900.
+          - keycloak.localhost
+    depends_on:
+      - omniscope-viewer-1
+      - omniscope-viewer-2
+      - keycloak
+    ports:
+      # Viewer cluster entry point — OpenResty sticky session router
+      - "9091:80"
+      # Keycloak proxy — keycloak.localhost:9900 → keycloak:80 (internal)
+      # Browsers resolve keycloak.localhost natively, no /etc/hosts needed.
+      - "9900:9900"
+    volumes:
+      - type: bind
+        source: ../cluster-data/nginx/nginx.conf
+        target: /usr/local/openresty/nginx/conf/nginx.conf
+        read_only: true
+    restart: unless-stopped
