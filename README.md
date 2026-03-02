@@ -288,6 +288,24 @@ Use it as the reference when configuring your own OIDC provider. You can also br
 
 Saved explorations (named and auto-saved) are stored inside the shared `files/` folder and work automatically across all viewer nodes with no extra configuration.
 
+### Recommended operational model: staging folder for data refresh
+
+We recommend using a **staging subfolder** within the shared `files/` directory as the working area where editors refresh data. This prevents viewers from ever seeing partial or mid-refresh data.
+
+The pattern works as follows:
+
+1. The editor executes the workflow and refreshes data inside a staging subfolder — for example `files/staging/`. This subfolder should be configured in the editor's permissions so that viewer permission groups have no access to it.
+2. Once the refresh completes successfully, a **scheduler task on the editor node** copies or moves the updated project files from `files/staging/` into the main viewer-accessible folder — for example `files/reports/`.
+3. Viewer nodes pick up the updated files automatically within around 30 seconds — no viewer restart or manual intervention required.
+
+This means:
+
+- **Viewers never see incomplete or mid-refresh data** — they only see a fully refreshed, complete project
+- **Data refresh is always owned by the editor node** — viewer nodes never execute workflows themselves
+- **The move is atomic** — because the staging folder and the viewer folder are on the same shared filesystem, the move is a rename operation on the same device, which is instantaneous and safe
+
+> This pattern is not specific to this Docker Compose reference architecture — it applies to any Omniscope multi-node deployment regardless of how the shared filesystem is implemented (NFS, EFS, Azure Files, shared network drive, etc.).
+
 ---
 
 ## Quick Start
