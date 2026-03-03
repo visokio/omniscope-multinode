@@ -26,7 +26,7 @@ No host configuration required. Clone, drop in two licence files, and run.
 | **Operating System** | **macOS (tested).** Linux should work (scripts use POSIX-compatible bash) but has not been tested. Windows is not supported — the shell scripts would need to be rewritten. |
 | **Docker Desktop** | Allocate at least **6 GB RAM** — Settings → Resources → Memory |
 | **Omniscope image** | `docker pull visokio/omniscope:latest` (or `docker pull --platform=linux/amd64 visokio/omniscope:latest` on Apple Silicon Macs) |
-| **Licence files** | Two licences: one editor licence, one viewer licence |
+| **Licence files** | Two licences: one editor licence, one viewer licence. If you need test licences for a multi-node setup, please get in touch at [support.visokio.com](https://support.visokio.com). |
 
 ---
 
