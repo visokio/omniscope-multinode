@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schedulerConfig configurationFilePath="/root/omniscope-server/config.xml" port="24679" watchFolder="watch" watchPollingInterval="5000" forkScheduledExecution="false" _visokio_app_version="2026.1-preview[DataStorage_InMemoryLruCache] b22428">
+<schedulerConfig configurationFilePath="/home/omniscope/omniscope-server/config.xml" port="24679" watchFolder="watch" watchPollingInterval="5000" forkScheduledExecution="false" _visokio_app_version="2026.1-preview b22429">
   <globalConfig>
     <serverGlobalConfig logLevel="INFO" logAiBlockInDiagnosticMode="false" logSupportNinjaChats="false" persistAiDebugInLogs="false" useCustomLibraryBlockPath="false" isBlocksLibraryProtected="false" useSpecificRVersionForBuildInBlocks="false" useRExecutableFolder="false" useRLibraryFolder="false" usePythonExecutableFolder="false" usePythonLibraryFolder="false" customBlockExecutionEnvironment="HOST_UNRESTRICTED" visokioGeneratedImagesMaxDiskSpaceGB="5.0" hideCommunityBlocks="false">
       <networkingConfig>
         <servernetworking runWebServer="true" allowLocalhostDesktopExperience="false" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" enableHttp2="true" redirectHttpToHttps="false" enableWebSocket="true" enableWebSocketCompression="true" enableSingleSessionPerIdentity="false">
           <sslContext>
-            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:28Y+eBlnNBlYy2AqZsZwuU5eW8XUU9ItNg8ZrT9r7uM=" keyManagerPassword="\OE:cqrRylWiVleMrlcOu2ZvNXcr6vkQNc8M6l544Rux74M=" />
+            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:CB6seSqwG/Yvrp0ZIv4AgbqLb8lJrrw8/NrZTT/cvIs=" keyManagerPassword="\OE:QrnTbxH/0kMaC8CB8REvIcOOEBHrdIG9hNsPD8lFEaE=" />
           </sslContext>
           <redirectConfig>
             <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -23,7 +23,7 @@
     </serverGlobalConfig>
   </globalConfig>
   <mobileWebServerConfig>
-    <mobilewebserver folder="files" macrosFolder="Macros" showAppName="true" showVisokioBrandingAndResources="true" hideAttributionLogo="false" allowServerWritePermission="true" maxUploadSizeInMB="500" allowUsingFilesOutsideSharingFolder="false" allowFeedbackOption="true" allowAppTour="true" allowRenderInAnyIframe="false" maskVersion="false" hideBranchNameFromVersion="false" hideVisokioProjectTemplates="false" workflowDataCompression="NONE" maxConcurrentWorkflowJobs="1" enableWorkflowExecutionInMemoryEngine="false" workflowExecutionInMemoryFileSystemSizeMb="4096" workflowExecutionInMemoryPerProjectCacheSizeMb="1024" enableWorkflowExecutionDataCaching="false" enableWorkflowExecutionParallelExec="false" enableWorkflowStatsRecording2="true" enableWorkflowRepeatabilityChecker="false" enableFormulaStatsRecording="false" enableSchedulerApi="true" enableWorkflowApi="true" enableWorkflowGrid="true" useQueryCache2="false" queryCacheMemoryLimitMonitoredMb="75" queryCacheMemoryLimitUnmonitoredMb="25" projectDormancy="NEVER" gaEnableExtendedTracking="false" gaDebugMode="false" shareAnonymousUsageData="true" shareMachineIdForUsageTracking="false" allowLoadCredentialsFromAmazonEC2MetadataService="false" allowLoadCredentialsFromGoogleComputeEngine="false" keepHiddenAppsConnectedOnDesktop="false" enableUnauthenticatedGlobalResources="false" enableApiMetadataPagesAndEndpoints="true" enableProjectHistory="true" deleteHistoryAfter="NEVER" historyGranularity="HIGH" projectAutomationEnabled="true" minimumAutomationFrequency="SECOND" enable="true" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" redirectHttpToHttps="false">
+    <mobilewebserver folder="files" macrosFolder="Macros" showAppName="true" showVisokioBrandingAndResources="true" hideAttributionLogo="false" allowServerWritePermission="true" maxUploadSizeInMB="500" allowUsingFilesOutsideSharingFolder="false" allowFeedbackOption="true" allowAppTour="true" allowRenderInAnyIframe="false" maskVersion="false" hideBranchNameFromVersion="false" hideVisokioProjectTemplates="false" workflowDataCompression="NONE" maxConcurrentWorkflowJobs="1" enableWorkflowExecutionInMemoryEngine="false" workflowExecutionInMemoryFileSystemSizeMb="4096" workflowExecutionInMemoryPerProjectCacheSizeMb="1024" enableWorkflowExecutionDataCaching="false" enableWorkflowExecutionParallelExec="false" enableWorkflowStatsRecording2="true" enableWorkflowRepeatabilityChecker="false" enableFormulaStatsRecording="false" enableSchedulerApi="true" enableWorkflowApi="true" enableWorkflowGrid="true" useQueryCache2="false" queryCacheMemoryLimitMonitoredMb="75" queryCacheMemoryLimitUnmonitoredMb="25" projectDormancy="ONE_WEEK" gaEnableExtendedTracking="false" gaDebugMode="false" shareAnonymousUsageData="true" shareMachineIdForUsageTracking="false" allowLoadCredentialsFromAmazonEC2MetadataService="false" allowLoadCredentialsFromGoogleComputeEngine="false" keepHiddenAppsConnectedOnDesktop="false" enableUnauthenticatedGlobalResources="false" enableApiMetadataPagesAndEndpoints="true" enableProjectHistory="true" deleteHistoryAfter="NEVER" historyGranularity="HIGH" projectAutomationEnabled="true" minimumAutomationFrequency="SECOND" enable="true" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" redirectHttpToHttps="false">
       <projectWhitelistResourcesAccessCriteria>
         <ProjectWhitelistResourceAccessCriteria allowUsingFilesOutsideSharingFolder="false">
           <administrativeProjectsWhitelistResources>
@@ -51,20 +51,7 @@
           <anonymous>
             <permissions listDirectory="false" downloadFile="false" viewInMobile="false" datamanager="false" datamanagerViewOnly="false" editReport="false" fileManagement="false" getStatic="false" viewServerState="false" exportData="false" sharedReportDataRefresh="false" designViews="false" projectPublisher="false" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="false" editBookmarks="false" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
           </anonymous>
-          <groups>
-            <group enabled="true" name="Report viewer">
-              <permissions>
-                <permissions listDirectory="true" downloadFile="false" viewInMobile="true" datamanager="false" datamanagerViewOnly="false" editReport="false" fileManagement="false" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="false" designViews="false" projectPublisher="false" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="false" editBookmarks="false" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
-              </permissions>
-              <mechanisms>
-                <OpenIDConnectMechanism mechanismName="OpenID Connect">
-                  <claims>
-                    <OpenIDConnectMechanismClaimMatchesAnyCondition value="viewer-role" claimName="roles" />
-                  </claims>
-                </OpenIDConnectMechanism>
-              </mechanisms>
-            </group>
-          </groups>
+          <groups />
           <superGroups>
             <group enabled="true" name="Admin [auto-setup]">
               <permissions>
@@ -78,11 +65,23 @@
                 </listOfUsers>
               </mechanisms>
             </group>
+            <group enabled="true" name="Group">
+              <permissions>
+                <permissions listDirectory="true" downloadFile="true" viewInMobile="true" datamanager="true" datamanagerViewOnly="false" editReport="true" fileManagement="true" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="true" designViews="true" projectPublisher="true" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="true" editBookmarks="true" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
+              </permissions>
+              <mechanisms>
+                <OpenIDConnectMechanism mechanismName="OpenID Connect">
+                  <claims>
+                    <OpenIDConnectMechanismClaimMatchesAnyCondition value="editor-role" claimName="roles" />
+                  </claims>
+                </OpenIDConnectMechanism>
+              </mechanisms>
+            </group>
           </superGroups>
           <openIDConnectSettings>
             <oidcSettings enabled="true" redirectToProviderForLoginAutomatically="false">
               <providers>
-                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-viewer" clientSecret="Mitei Gebua Widai Kavea Jiraa Rybei Nymua Jidei Pitee Byrau Hixoa Vyneu Dyxee Hesua Fawue Reboe Rydua Karei Vyvau Vyjua Gyfau Rywea Kynau Dymae Vyreu Manou G" clientSecretNew="\OE:TfiMHfbXXb70HVsGWLtvuuc9eWEgs/F20raAuH7xKdPIxcLJYtj8Z71h/GelWZNSkabR8ifGBwC5zrMkNGdrMQ==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
+                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Sedoa Mavai Ramau Nidea Reroa Jaxea Ravui Hykoa Laweu Jiseu Jejou Gebei Sitae Gepou Baroi Gafaa Jyvei Hefau Fygua Gevua Badai Nixua Berea Tywai Kigaa Giwou F" clientSecretNew="\OE:RMv9qTLNKitrtRGfVwLe3430vykJBCQAKf0o4o2zs5DSsvmAZXPe0PxGZVAbeS76IyoE6As7wXzu0gQ3NWzawQ==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
               </providers>
             </oidcSettings>
           </openIDConnectSettings>
@@ -116,7 +115,7 @@
       </defaultFolderConfig>
       <neverCleans />
       <sslContext>
-        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:nWaaTvp+oeAgADtlWB6TBggsDIlMTJUp4MYHjEDP0IQ=" keyManagerPassword="\OE:uW1DZl/wBH+m5k8mk4Meup3+bBVCK7/Cw2hhwpeCNGI=" />
+        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:8QxD/7N81Mw/KDD1ffvWdo2W2X6H5BoOIOV5Pc60NpU=" keyManagerPassword="\OE:Uf+QaSFBe9yxru6pqJogUpyxcM8TtzISt0PrJv7DjsE=" />
       </sslContext>
       <redirectConfig>
         <redirectConfig enabled="false" newContextURL="/" permanent="false" />

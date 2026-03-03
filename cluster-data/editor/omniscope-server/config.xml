@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schedulerConfig configurationFilePath="/root/omniscope-server/config.xml" port="24679" watchFolder="watch" watchPollingInterval="5000" forkScheduledExecution="false" _visokio_app_version="2026.1-preview[DataStorage_InMemoryLruCache] b22428">
+<schedulerConfig configurationFilePath="/home/omniscope/omniscope-server/config.xml" port="24679" watchFolder="watch" watchPollingInterval="5000" forkScheduledExecution="false" _visokio_app_version="2026.1-preview b22429">
   <globalConfig>
     <serverGlobalConfig logLevel="INFO" logAiBlockInDiagnosticMode="false" logSupportNinjaChats="false" persistAiDebugInLogs="false" useCustomLibraryBlockPath="false" isBlocksLibraryProtected="false" useSpecificRVersionForBuildInBlocks="false" useRExecutableFolder="false" useRLibraryFolder="false" usePythonExecutableFolder="false" usePythonLibraryFolder="false" customBlockExecutionEnvironment="HOST_UNRESTRICTED" visokioGeneratedImagesMaxDiskSpaceGB="5.0" hideCommunityBlocks="false">
       <networkingConfig>
         <servernetworking runWebServer="true" allowLocalhostDesktopExperience="false" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" enableHttp2="true" redirectHttpToHttps="false" enableWebSocket="true" enableWebSocketCompression="true" enableSingleSessionPerIdentity="false">
           <sslContext>
-            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:SZf0kdLhkvsLNcaRSEyeRTQHAjoHwhpq/V27b+XEmn0=" keyManagerPassword="\OE:DectQMy50ZQKCpb4226/2pDVD3vcMU/C5Gy2Dx+5bDM=" />
+            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:CB6seSqwG/Yvrp0ZIv4AgbqLb8lJrrw8/NrZTT/cvIs=" keyManagerPassword="\OE:QrnTbxH/0kMaC8CB8REvIcOOEBHrdIG9hNsPD8lFEaE=" />
           </sslContext>
           <redirectConfig>
             <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -51,20 +51,7 @@
           <anonymous>
             <permissions listDirectory="false" downloadFile="false" viewInMobile="false" datamanager="false" datamanagerViewOnly="false" editReport="false" fileManagement="false" getStatic="false" viewServerState="false" exportData="false" sharedReportDataRefresh="false" designViews="false" projectPublisher="false" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="false" editBookmarks="false" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
           </anonymous>
-          <groups>
-            <group enabled="true" name="Project editor">
-              <permissions>
-                <permissions listDirectory="true" downloadFile="true" viewInMobile="true" datamanager="true" datamanagerViewOnly="false" editReport="true" fileManagement="true" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="true" designViews="true" projectPublisher="true" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="true" editBookmarks="true" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
-              </permissions>
-              <mechanisms>
-                <OpenIDConnectMechanism mechanismName="OpenID Connect">
-                  <claims>
-                    <OpenIDConnectMechanismClaimMatchesAnyCondition value="editor-role" claimName="roles" />
-                  </claims>
-                </OpenIDConnectMechanism>
-              </mechanisms>
-            </group>
-          </groups>
+          <groups />
           <superGroups>
             <group enabled="true" name="Admin [auto-setup]">
               <permissions>
@@ -78,11 +65,23 @@
                 </listOfUsers>
               </mechanisms>
             </group>
+            <group enabled="true" name="Group">
+              <permissions>
+                <permissions listDirectory="true" downloadFile="true" viewInMobile="true" datamanager="true" datamanagerViewOnly="false" editReport="true" fileManagement="true" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="true" designViews="true" projectPublisher="true" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="true" editBookmarks="true" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
+              </permissions>
+              <mechanisms>
+                <OpenIDConnectMechanism mechanismName="OpenID Connect">
+                  <claims>
+                    <OpenIDConnectMechanismClaimMatchesAnyCondition value="editor-role" claimName="roles" />
+                  </claims>
+                </OpenIDConnectMechanism>
+              </mechanisms>
+            </group>
           </superGroups>
           <openIDConnectSettings>
             <oidcSettings enabled="true" redirectToProviderForLoginAutomatically="false">
               <providers>
-                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Lerui Mapoi Tadai Wesau Majaa Gywoa Repue Miraa Jakau Fedea Lybai Pynue Fytuu Mipoe Kasei Jafuu Vexai Denae Pekue Tesei Dybui Sasua Tebea Pefoe Fadaa Hyxoe T" clientSecretNew="\OE:h0iKO+eZ3I0KELtqf4NHAZP3gg0KsYRXaavuUe+F3trfecq5JTz1BxIc3yf1e9dSNjge0Czgu9Vr1DQqBGZwbw==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
+                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Sedoa Mavai Ramau Nidea Reroa Jaxea Ravui Hykoa Laweu Jiseu Jejou Gebei Sitae Gepou Baroi Gafaa Jyvei Hefau Fygua Gevua Badai Nixua Berea Tywai Kigaa Giwou F" clientSecretNew="\OE:RMv9qTLNKitrtRGfVwLe3430vykJBCQAKf0o4o2zs5DSsvmAZXPe0PxGZVAbeS76IyoE6As7wXzu0gQ3NWzawQ==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
               </providers>
             </oidcSettings>
           </openIDConnectSettings>
@@ -116,7 +115,7 @@
       </defaultFolderConfig>
       <neverCleans />
       <sslContext>
-        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:wx1DwKCt1N/NQRxZ0s/KbEskjHolW8XSmK8l4ru9ToA=" keyManagerPassword="\OE:dlLTMdYb4WJHY5Zm5kO0wYEsYmIVyMDPlBMnr+W65fA=" />
+        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:8QxD/7N81Mw/KDD1ffvWdo2W2X6H5BoOIOV5Pc60NpU=" keyManagerPassword="\OE:Uf+QaSFBe9yxru6pqJogUpyxcM8TtzISt0PrJv7DjsE=" />
       </sslContext>
       <redirectConfig>
         <redirectConfig enabled="false" newContextURL="/" permanent="false" />

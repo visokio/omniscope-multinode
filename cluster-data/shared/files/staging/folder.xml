@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mobilefolder allowUploadInsideFolder="true" hideInParent="true" allowPerReportAuthentication="true" allowSubfolderOverrides="true" servingIOROnly="false" isAdministrativeFolder="false" allowResourceAccessOutsideProjectFolder="true" showProjectListAsGrid="false" _visokio_app_version="2026.1-preview b22429">
+  <anonymous>
+    <permissions listDirectory="false" downloadFile="false" viewInMobile="false" datamanager="false" datamanagerViewOnly="false" editReport="false" fileManagement="false" getStatic="false" viewServerState="false" exportData="false" sharedReportDataRefresh="false" designViews="false" projectPublisher="false" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="false" editBookmarks="false" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
+  </anonymous>
+  <groups />
+  <superGroups />
+  <aiSettings>
+    <AiSettings specify="false" allowOverride="true" enabled="true">
+      <providers />
+      <customSql>
+        <CustomSqlAiIntegration specify="false" allowOverride="true" enabled="true" />
+      </customSql>
+      <workflowExecutions>
+        <WorkflowExecutionsAiIntegration specify="false" allowOverride="true" enabled="true" />
+      </workflowExecutions>
+      <block>
+        <BlockAiIntegration maxInterpreterTrials="5" maxFunctionCallCycles="5" logChatMessages="false" temperatureOAI="0.0" specify="false" allowOverride="true" enabled="true" />
+      </block>
+      <report>
+        <ReportAiIntegration disableGrammar="false" disableFieldRestrictions="false" defaultChatStyle="MINIMALIST" applyStyles="true" layoutType="ZONAL" useLegacyFiltersStrategy="false" useOldSystemPrompt="false" swapChatActionOrder="false" specify="false" allowOverride="true" enabled="true" />
+      </report>
+      <workflow>
+        <WorkflowAiIntegration defaultChatStyle="MINIMALIST" includeMeta="true" includeSchema="true" includeDataPreview="true" enableMermaid="false" specify="false" allowOverride="true" enabled="true" />
+      </workflow>
+      <dataQna>
+        <DataQnaAiIntegration defaultChatStyle="MINIMALIST" initialMessageBehaviour="USER_MESSAGE" enableInitialMsg="true" specify="false" allowOverride="true" enabled="true" />
+      </dataQna>
+      <support>
+        <SupportAiIntegration specify="false" allowOverride="true" enabled="true" />
+      </support>
+    </AiSettings>
+  </aiSettings>
+</mobilefolder>
