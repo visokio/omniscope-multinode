@@ -41,7 +41,9 @@ Omniscope's multi-node architecture separates the authoring environment from the
 
 Both node types share the same project files, so projects published by editors are immediately visible to viewers with no synchronisation step.
 
-> **⚠️ Viewer nodes are for report consumption only.** A viewer node prevents users from creating or modifying projects — this is enforced at the Omniscope application level, not just by file permissions. If your users need to create projects, personalise templates, or do anything that involves writing a new project file, they are acting as editors, not viewers. Those users need access to an editor node with an appropriate editor licence. **This reference deployment does not show how to build a self-service project-creation workflow** — it demonstrates the pure consumption case only.
+> **⚠️ Viewer nodes are for report consumption only.** A viewer node prevents users from creating or modifying projects — this is enforced at the Omniscope application level, not just by file permissions. If your users need to create projects, personalise templates, or do anything that involves writing a new project file, they are acting as editors, not viewers. Those users need access to an editor node with an appropriate editor licence. This reference deployment demonstrates the pure consumption case only.
+
+> **There are two ways editors and viewers can work with shared projects.** In the **staging folder** approach, editors work in a staging working copy linked to the master project. Nothing is visible to viewers until the editor pushes. In the **direct** approach, the editor and viewer both work on the same master project — the viewer sees changes automatically within approximately 30 seconds with no push step. For full details see [Two ways to work: staging folder vs direct](#two-ways-to-work-staging-folder-vs-direct) below.
 
 ### What is universal versus what is specific to this reference architecture
 
@@ -302,11 +304,11 @@ Saved explorations (named and auto-saved) are stored inside the shared `files/` 
 
 ### Two ways to work: staging folder vs. direct
 
-There are two ways editors and viewers can work with shared projects. We recommend the staging folder approach.
+There are two ways editors and viewers can work with shared projects.
 
-**Option A — Recommended: staging folder.** Editors work in a staging working copy that is linked to the master project in the root folder. Viewers only ever open the master project. Nothing the editor does in staging is visible to viewers until the editor explicitly pushes. This means viewers never see partial or mid-refresh data.
+**Option A — Staging folder.** Editors work in a staging working copy linked to the master project in the root folder. Viewers only ever open the master project. Nothing the editor does in staging is visible to viewers until the editor explicitly pushes, so viewers never see partial or mid-refresh data. Note that this approach is not specific to multi-node deployments — you can use the same staging folder pattern on any Omniscope instance.
 
-**Option B — Direct.** The editor and viewer both work with the same master project in the root folder. The editor opens the project, executes it or makes changes, and the viewer sees those changes automatically within approximately 30 seconds. There is no staging area and no push step. Viewers may briefly see partial data while the editor is executing, so this is not recommended for production.
+**Option B — Direct.** The editor and viewer both work with the same master project in the root folder. The editor opens the project, executes it or makes changes, and the viewer sees those changes automatically within approximately 30 seconds. There is no staging area and no push step.
 
 For step-by-step instructions for both approaches, see [Step 6 — Verify everything is working](#6--verify-everything-is-working) in the Quick Start guide.
 
@@ -320,7 +322,6 @@ This means:
 - **Data refresh is always owned by the editor node** — viewer nodes never execute workflows themselves
 - **The move is atomic** — because the staging folder and the viewer folder are on the same shared filesystem, the move is a rename operation on the same device, which is instantaneous and safe
 
-> This pattern is not specific to this Docker Compose reference architecture — it applies to any Omniscope multi-node deployment regardless of how the shared filesystem is implemented (NFS, EFS, Azure Files, shared network drive, etc.).
 
 ### Staging visibility model used in this reference setup
 
@@ -423,7 +424,7 @@ Use these only for debugging node-specific behavior (for example, confirming whi
 
 The cluster is pre-configured with Keycloak as its OIDC provider. No configuration changes are needed. Follow these steps to confirm that the editor, viewer cluster, shared files, and sticky session routing are all working correctly.
 
-There are two ways to work with this reference architecture. We recommend the **staging folder approach** (Option A), but both are documented below. Before testing either, complete the one-time data seeding step first.
+There are two ways to work with this reference architecture, both documented below. Before testing either, complete the one-time data seeding step first.
 
 #### Prerequisites — seed project data
 
@@ -451,9 +452,9 @@ Before testing either workflow, first verify that the viewer can open the seeded
 
 ---
 
-#### Option A — Recommended: using the staging folder
+#### Option A — using the staging folder
 
-This is the approach we recommend. The project inside the staging folder is a **working copy** linked to the master project in the root folder — the one that viewers open. The editor works entirely within the staging copy: executing the workflow, adding or modifying report views, and validating the result. Nothing the editor does is visible to viewers until the editor explicitly pushes. At that point the root folder project updates automatically and viewers will see the new version within approximately 30 seconds.
+The project inside the staging folder is a **working copy** linked to the master project in the root folder — the one that viewers open. The editor works entirely within the staging copy: executing the workflow, adding or modifying report views, and validating the result. Nothing the editor does is visible to viewers until the editor explicitly pushes. At that point the root folder project updates automatically and viewers will see the new version within approximately 30 seconds.
 
 **Step 1 — Open the staging working copy on the editor**
 
@@ -486,8 +487,6 @@ Once the scheduled refresh has run and you are happy with the result, open the s
 #### Option B — Without staging (direct workflow)
 
 In this simpler approach the editor and viewer both work with the same master project in the root folder directly. The editor opens that project, executes it or makes report changes, and those changes are reflected on the viewer within approximately 30 seconds. There is no staging area and no push step.
-
-This means viewers may briefly see partial or mid-refresh data while the editor is executing, which is why we do not recommend this approach for production. It is useful for understanding the basic shared-file model or for simple setups where that trade-off is acceptable.
 
 **Step 1 — Open the root project on the editor**
 
