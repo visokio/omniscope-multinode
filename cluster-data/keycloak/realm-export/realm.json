@@ -252,10 +252,10 @@
 
   "users": [
     {
-      "username": "editor-user",
-      "email": "editor@visokio.local",
+      "username": "editor-user-a",
+      "email": "editor-a@visokio.local",
       "firstName": "Editor",
-      "lastName": "User",
+      "lastName": "User A",
       "enabled": true,
       "emailVerified": true,
       "createdTimestamp": 1700000000000,

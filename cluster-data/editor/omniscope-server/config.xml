@@ -5,7 +5,7 @@
       <networkingConfig>
         <servernetworking runWebServer="true" allowLocalhostDesktopExperience="false" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" enableHttp2="true" redirectHttpToHttps="false" enableWebSocket="true" enableWebSocketCompression="true" enableSingleSessionPerIdentity="false">
           <sslContext>
-            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:CB6seSqwG/Yvrp0ZIv4AgbqLb8lJrrw8/NrZTT/cvIs=" keyManagerPassword="\OE:QrnTbxH/0kMaC8CB8REvIcOOEBHrdIG9hNsPD8lFEaE=" />
+            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:68UAPfgLKTwrKMUKKtUFDyjOXiaykBbLwmW99ogPmNY=" keyManagerPassword="\OE:nHWncMPHSxV/b9TBLxPlsNKmr8V0mYJlozU11q4esTw=" />
           </sslContext>
           <redirectConfig>
             <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -41,7 +41,13 @@
       <customTextReplacements />
       <virtualRoots>
         <VirtualRootsOptions>
-          <folders />
+          <folders>
+            <VirtualRoot displayName="Staging">
+              <folder>
+                <LocalFileLocationOptions __2n_location="/home/omniscope/omniscope-server/files/staging/" />
+              </folder>
+            </VirtualRoot>
+          </folders>
         </VirtualRootsOptions>
       </virtualRoots>
       <allowedFileExtensionsForUpload />
@@ -65,7 +71,7 @@
                 </listOfUsers>
               </mechanisms>
             </group>
-            <group enabled="true" name="Group">
+            <group enabled="true" name="Project editor">
               <permissions>
                 <permissions listDirectory="true" downloadFile="true" viewInMobile="true" datamanager="true" datamanagerViewOnly="false" editReport="true" fileManagement="true" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="true" designViews="true" projectPublisher="true" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="true" editBookmarks="true" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
               </permissions>
@@ -81,7 +87,7 @@
           <openIDConnectSettings>
             <oidcSettings enabled="true" redirectToProviderForLoginAutomatically="false">
               <providers>
-                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Sedoa Mavai Ramau Nidea Reroa Jaxea Ravui Hykoa Laweu Jiseu Jejou Gebei Sitae Gepou Baroi Gafaa Jyvei Hefau Fygua Gevua Badai Nixua Berea Tywai Kigaa Giwou F" clientSecretNew="\OE:RMv9qTLNKitrtRGfVwLe3430vykJBCQAKf0o4o2zs5DSsvmAZXPe0PxGZVAbeS76IyoE6As7wXzu0gQ3NWzawQ==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
+                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Netea Risua Tygei Mefue Syjuu Nywae Nyfai Lafoe Japui Hybee Jisee Famua Behoi Dihoe Jymou Daxai Savuu Kenua Haroa Bipui Mywau Hyxea Garoi Litoi Lihui Nyfaa B" clientSecretNew="\OE:cQSHu663Z/ko1POd/r5IKV7UHdohh1AKEqtjgL7pzKjQV5lkjTZe7OWoVk2j3hVRtsd4rSScNunzkL70yG97WA==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
               </providers>
             </oidcSettings>
           </openIDConnectSettings>
@@ -115,7 +121,7 @@
       </defaultFolderConfig>
       <neverCleans />
       <sslContext>
-        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:8QxD/7N81Mw/KDD1ffvWdo2W2X6H5BoOIOV5Pc60NpU=" keyManagerPassword="\OE:Uf+QaSFBe9yxru6pqJogUpyxcM8TtzISt0PrJv7DjsE=" />
+        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:AQ77c17kJ6ouGfwR4yLJDqu2NMQS4ZRo5XW7fRsHBEk=" keyManagerPassword="\OE:Cs2hUnifGABIheskVJ3Mo1At0yB3jjx9QmKKLqhg8kA=" />
       </sslContext>
       <redirectConfig>
         <redirectConfig enabled="false" newContextURL="/" permanent="false" />

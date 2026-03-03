@@ -336,6 +336,64 @@ if ! wait_for_http "Viewer endpoint" "http://viewer.localhost:9091"; then
   exit 3
 fi
 
+# ------------------------------------------------------------------------------
+# Read OIDC details from source-of-truth configs (cluster-data/) for summary.
+# ------------------------------------------------------------------------------
+EDITOR_OIDC_LINE="$(grep -m1 '<oidcProviderKeycloak ' "${REPO_ROOT}/cluster-data/editor/omniscope-server/config.xml" || true)"
+VIEWER_OIDC_LINE="$(grep -m1 '<oidcProviderKeycloak ' "${REPO_ROOT}/cluster-data/viewer/omniscope-server/config.xml" || true)"
+REALM_JSON="${REPO_ROOT}/cluster-data/keycloak/realm-export/realm.json"
+
+EDITOR_ISSUER_URI="$(printf '%s\n' "${EDITOR_OIDC_LINE}" | sed -n 's/.*issuerUri="\([^"]*\)".*/\1/p')"
+EDITOR_CLIENT_ID="$(printf '%s\n' "${EDITOR_OIDC_LINE}" | sed -n 's/.*clientId="\([^"]*\)".*/\1/p')"
+EDITOR_CLIENT_SECRET="$(printf '%s\n' "${EDITOR_OIDC_LINE}" | sed -n 's/.*clientSecret="\([^"]*\)".*/\1/p')"
+EDITOR_LOGIN_MODE="$(printf '%s\n' "${EDITOR_OIDC_LINE}" | sed -n 's/.*loginMode="\([^"]*\)".*/\1/p')"
+
+VIEWER_CLIENT_ID="$(printf '%s\n' "${VIEWER_OIDC_LINE}" | sed -n 's/.*clientId="\([^"]*\)".*/\1/p')"
+VIEWER_CLIENT_SECRET="$(printf '%s\n' "${VIEWER_OIDC_LINE}" | sed -n 's/.*clientSecret="\([^"]*\)".*/\1/p')"
+
+# Prefer raw Keycloak client secrets from realm export to avoid showing
+# Omniscope's transformed/encrypted-at-rest values from config.xml.
+EDITOR_REALM_SECRET="$(awk '
+  /"clientId": "omniscope-editor"/ { in_editor=1; next }
+  in_editor && /"secret":/ {
+    match($0, /"secret":[[:space:]]*"[^"]+"/)
+    if (RSTART) {
+      s = substr($0, RSTART, RLENGTH)
+      sub(/.*"secret":[[:space:]]*"/, "", s)
+      sub(/"$/, "", s)
+      print s
+      exit
+    }
+  }
+' "${REALM_JSON}")"
+
+VIEWER_REALM_SECRET="$(awk '
+  /"clientId": "omniscope-viewer"/ { in_viewer=1; next }
+  in_viewer && /"secret":/ {
+    match($0, /"secret":[[:space:]]*"[^"]+"/)
+    if (RSTART) {
+      s = substr($0, RSTART, RLENGTH)
+      sub(/.*"secret":[[:space:]]*"/, "", s)
+      sub(/"$/, "", s)
+      print s
+      exit
+    }
+  }
+' "${REALM_JSON}")"
+
+if [[ -n "${EDITOR_REALM_SECRET}" ]]; then
+  EDITOR_CLIENT_SECRET="${EDITOR_REALM_SECRET}"
+fi
+if [[ -n "${VIEWER_REALM_SECRET}" ]]; then
+  VIEWER_CLIENT_SECRET="${VIEWER_REALM_SECRET}"
+fi
+
+if [[ -z "${EDITOR_ISSUER_URI}" ]]; then
+  EDITOR_ISSUER_URI="http://keycloak.localhost:9900/realms/visokio/"
+fi
+if [[ -z "${EDITOR_LOGIN_MODE}" ]]; then
+  EDITOR_LOGIN_MODE="IMPLICIT_SSO_ALWAYS"
+fi
 
 # ------------------------------------------------------------------------------
 # Print summary
@@ -388,16 +446,19 @@ printf "  OIDC CONFIGURATION (pre-configured — for reference only)\n"
 printf -- '-%.0s' {1..70}; echo
 printf "  Both nodes are already configured to use Keycloak. No setup needed.\n"
 printf "\n"
-printf "  Issuer URI:   http://keycloak.localhost:9900/realms/visokio/\n"
-printf "  Login mode:   Automatic login, always\n"
+printf "  Issuer URI:   %s\n" "${EDITOR_ISSUER_URI}"
+printf "  Login mode:   %s\n" "${EDITOR_LOGIN_MODE}"
 printf "\n"
 printf "  Editor node   http://editor.localhost:9090\n"
-printf "    Client ID:  omniscope-editor\n"
+printf "    Client ID:      %s\n" "${EDITOR_CLIENT_ID}"
+printf "    Client secret:  %s\n" "${EDITOR_CLIENT_SECRET}"
 printf "\n"
 printf "  Viewer nodes  http://viewer.localhost:9091\n"
 printf "    Direct:     http://viewer-node-1.localhost:19091\n"
 printf "    Direct:     http://viewer-node-2.localhost:19092\n"
-printf "    Client ID:  omniscope-viewer\n"
+printf "    Client ID:      %s\n" "${VIEWER_CLIENT_ID}"
+printf "    Client secret:  %s\n" "${VIEWER_CLIENT_SECRET}"
+printf "    Note:           Both viewer nodes share this client/secret.\n"
 printf "\n"
 printf "  Roles -> Omniscope permission groups:\n"
 printf "    editor-role  -> Project editor  (editor node)\n"
@@ -407,7 +468,7 @@ echo
 printf -- '-%.0s' {1..70}; echo
 printf "  TEST USERS\n"
 printf -- '-%.0s' {1..70}; echo
-printf "  editor-user   / editor123  -> editor-role  -> http://editor.localhost:9090\n"
+printf "  editor-user-a / editor123  -> editor-role  -> http://editor.localhost:9090\n"
 printf "  editor-user-b / editor123  -> editor-role  -> http://editor.localhost:9090\n"
 printf "  viewer-user-a / viewer123  -> viewer-role  -> http://viewer.localhost:9091\n"
 printf "  viewer-user-b / viewer123  -> viewer-role  -> http://viewer.localhost:9091\n"

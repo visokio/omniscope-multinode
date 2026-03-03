@@ -1,0 +1,12 @@
+{
+  "uuid": "5F3710672F7144DABF6B03BB1C7BD189",
+  "created": "2026-03-03T09:17:30.262Z",
+  "checked": "2026-03-03T09:17:30.263Z",
+  "appversion": "2026.1-preview b22429",
+  "hostname": "a1c085c287de",
+  "hostips": "/172.18.0.4",
+  "userhome": "/home/omniscope",
+  "username": "omniscope",
+  "installdir": "/home/omniscope/visokio-omniscope/",
+  "pid": 19
+}

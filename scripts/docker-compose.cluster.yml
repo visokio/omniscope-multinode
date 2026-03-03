@@ -218,6 +218,8 @@ services:
       # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
       # Keep temp files inside the shared files/ mount.
       # Use a dedicated subdir so editor temp files are isolated from viewer nodes.
+      # Align image healthcheck probe port with Omniscope's configured HTTP port.
+      OMNI_HTTP_PORT: "9090"
       JAVA_TOOL_OPTIONS: >-
         -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/editor
     ports:
@@ -277,6 +279,8 @@ services:
       # Viewer mode.
       # Keep tmp inside files/ so atomic rename() stays within the same mount.
       # Use a per-node tmp subdir to isolate temp artifacts across viewer nodes.
+      # Align image healthcheck probe port with Omniscope's configured HTTP port.
+      OMNI_HTTP_PORT: "9090"
       JAVA_TOOL_OPTIONS: >-
         -Domniscope.nodeType=viewer
         -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-1
@@ -325,6 +329,8 @@ services:
     environment:
       # Pass JVM args via JAVA_TOOL_OPTIONS so the JVM applies them on startup.
       # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
+      # Align image healthcheck probe port with Omniscope's configured HTTP port.
+      OMNI_HTTP_PORT: "9090"
       JAVA_TOOL_OPTIONS: >-
         -Domniscope.nodeType=viewer
         -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-2
@@ -362,7 +368,8 @@ services:
   #
   # Role 2 — Viewer sticky session router (port 9091):
   #   Routes viewer traffic across 2 Omniscope viewer nodes using Lua cookie routing.
-  #   On first request, sets OMNI_ROUTE cookie to pin the browser to a specific node.
+  #   On first request, sets OMNI_ROUTE cookie (with LB generation + node) to pin
+  #   the browser to a specific node; stale cookies from previous runs are ignored.
   #   All subsequent requests (XHR, API, OIDC callbacks) are routed to the same node.
   #
   # Viewer access:   http://viewer.localhost:9091
