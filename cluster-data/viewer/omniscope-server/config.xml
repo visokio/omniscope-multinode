@@ -5,7 +5,7 @@
       <networkingConfig>
         <servernetworking runWebServer="true" allowLocalhostDesktopExperience="false" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" enableHttp2="true" redirectHttpToHttps="false" enableWebSocket="true" enableWebSocketCompression="true" enableSingleSessionPerIdentity="false">
           <sslContext>
-            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:GBqXqptbbNNmGmtl/HzoHH9Zg2fIcQDIf+woQX4OWS4=" keyManagerPassword="\OE:zvf4BlJXiMXgaRDVTK4Cj41pn7XaYXjOy274XWjluLg=" />
+            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:vXblAOSw1Gv/an5XxOhVrMH8Enw/tU4MF8dqFAAJrBg=" keyManagerPassword="\OE:+s9OiYCoJ6RaNo9zmF+Zwuj/sjqa11WN5Q/T82QXdsE=" />
           </sslContext>
           <redirectConfig>
             <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -23,7 +23,7 @@
     </serverGlobalConfig>
   </globalConfig>
   <mobileWebServerConfig>
-    <mobilewebserver folder="files" macrosFolder="Macros" showAppName="true" showVisokioBrandingAndResources="true" hideAttributionLogo="false" allowServerWritePermission="true" maxUploadSizeInMB="500" allowUsingFilesOutsideSharingFolder="false" allowFeedbackOption="true" allowAppTour="true" allowRenderInAnyIframe="false" maskVersion="false" hideBranchNameFromVersion="false" hideVisokioProjectTemplates="false" workflowDataCompression="NONE" maxConcurrentWorkflowJobs="1" enableWorkflowExecutionInMemoryEngine="false" workflowExecutionInMemoryFileSystemSizeMb="4096" workflowExecutionInMemoryPerProjectCacheSizeMb="1024" enableWorkflowExecutionDataCaching="false" enableWorkflowExecutionParallelExec="false" enableWorkflowStatsRecording2="true" enableWorkflowRepeatabilityChecker="false" enableFormulaStatsRecording="false" enableSchedulerApi="true" enableWorkflowApi="true" enableWorkflowGrid="true" useQueryCache2="false" queryCacheMemoryLimitMonitoredMb="75" queryCacheMemoryLimitUnmonitoredMb="25" projectDormancy="ONE_WEEK" gaEnableExtendedTracking="false" gaDebugMode="false" shareAnonymousUsageData="true" shareMachineIdForUsageTracking="false" allowLoadCredentialsFromAmazonEC2MetadataService="false" allowLoadCredentialsFromGoogleComputeEngine="false" keepHiddenAppsConnectedOnDesktop="false" enableUnauthenticatedGlobalResources="false" enableApiMetadataPagesAndEndpoints="true" enableProjectHistory="true" deleteHistoryAfter="NEVER" historyGranularity="HIGH" projectAutomationEnabled="true" minimumAutomationFrequency="SECOND" enable="true" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" redirectHttpToHttps="false">
+    <mobilewebserver folder="files" macrosFolder="Macros" showAppName="true" showVisokioBrandingAndResources="true" hideAttributionLogo="false" allowServerWritePermission="true" maxUploadSizeInMB="500" allowUsingFilesOutsideSharingFolder="false" allowFeedbackOption="true" allowAppTour="true" allowRenderInAnyIframe="false" maskVersion="false" hideBranchNameFromVersion="false" hideVisokioProjectTemplates="false" workflowDataCompression="NONE" maxConcurrentWorkflowJobs="1" enableWorkflowExecutionInMemoryEngine="false" workflowExecutionInMemoryFileSystemSizeMb="4096" workflowExecutionInMemoryPerProjectCacheSizeMb="1024" enableWorkflowExecutionDataCaching="false" enableWorkflowExecutionParallelExec="false" enableWorkflowStatsRecording2="true" enableWorkflowRepeatabilityChecker="false" enableFormulaStatsRecording="false" enableSchedulerApi="true" enableWorkflowApi="true" enableWorkflowGrid="true" useQueryCache2="false" queryCacheMemoryLimitMonitoredMb="75" queryCacheMemoryLimitUnmonitoredMb="25" projectDormancy="NEVER" gaEnableExtendedTracking="false" gaDebugMode="false" shareAnonymousUsageData="true" shareMachineIdForUsageTracking="false" allowLoadCredentialsFromAmazonEC2MetadataService="false" allowLoadCredentialsFromGoogleComputeEngine="false" keepHiddenAppsConnectedOnDesktop="false" enableUnauthenticatedGlobalResources="false" enableApiMetadataPagesAndEndpoints="true" enableProjectHistory="true" deleteHistoryAfter="NEVER" historyGranularity="HIGH" projectAutomationEnabled="true" minimumAutomationFrequency="SECOND" enable="true" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" redirectHttpToHttps="false">
       <projectWhitelistResourcesAccessCriteria>
         <ProjectWhitelistResourceAccessCriteria allowUsingFilesOutsideSharingFolder="false">
           <administrativeProjectsWhitelistResources>
@@ -82,7 +82,7 @@
           <openIDConnectSettings>
             <oidcSettings enabled="true" redirectToProviderForLoginAutomatically="false">
               <providers>
-                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-viewer" clientSecret="Dymui Gedeu Memou Fimee Wirea Tafoa Rifeu Daxeu Nisoi Pahue Finoi Rybua Byrau Sedui Nasaa Rapau Lymae Tadui Bipeu Beboi Tivuu Gireu Fiwee Nihee Bahaa Syfoe M" clientSecretNew="\OE:KNl4QyDtfBHmGCkExGjGm5cv+7B4L6H220wDsYyo5ozhzdwX7P/tJ0ZXpPm30Z0UD2hraakkcIGrTvQVTucm6A==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
+                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-viewer" clientSecret="Lepaa Deboe Vaheu Sihee Metai Befou Fajai Syhuu Kyxuu Lysua Wegua Waweu Tipui Bysou Myboa Maguu Basoi Nibuu Hipue Nafoe Pisai Vekau Vijou Ledua Javaa Vyfai F" clientSecretNew="\OE:LSY19e1ibylyrIpwxShGvbQvvfHiO9QFKTsMnKlRmfMlUXK/liRjkVlGQpqyRcgkE+LI8GPMRX2fAOSdufp7/Q==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
               </providers>
             </oidcSettings>
           </openIDConnectSettings>
@@ -116,7 +116,7 @@
       </defaultFolderConfig>
       <neverCleans />
       <sslContext>
-        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:Dbquz7kWwuqJZZMVhlkaVczLvI6+Lmu1YZThREKfqXU=" keyManagerPassword="\OE:9iX4R+RYlIy9sU1ks7jdoDW1WYJNBc4Rpng/BcmOwsQ=" />
+        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:bNRQKapGdH5eITLxX1XgLqAWwz4CW85k1I+hJuwQDQw=" keyManagerPassword="\OE:vSuOo1oRgchaUgyRXdKcHqJYYyXDPNmMt5Bx1HZhOQI=" />
       </sslContext>
       <redirectConfig>
         <redirectConfig enabled="false" newContextURL="/" permanent="false" />

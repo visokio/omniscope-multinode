@@ -53,7 +53,8 @@ wait_for_http() {
 
   log "Waiting for ${name} at ${url} (timeout ${timeout_secs}s)..."
   while (( elapsed < timeout_secs )); do
-    code="$(curl -m 5 -sS -o /dev/null -w '%{http_code}' "${url}" || true)"
+    # Suppress transient curl timeout noise; readiness loop handles retries.
+    code="$(curl -m 8 -s -o /dev/null -w '%{http_code}' "${url}" 2>/dev/null || true)"
     if [[ -n "${code}" && "${code}" =~ ${ok_pattern} ]]; then
       log "${name} is reachable (${url} -> HTTP ${code})"
       return 0
@@ -328,9 +329,9 @@ if ! wait_for_http "OpenResty edge (viewer/keycloak only)" "http://viewer.localh
   dump_cluster_diagnostics
   exit 3
 fi
-if ! wait_for_http "Editor endpoint" "http://editor.localhost:9090" 120 2 '^(2|3)[0-9][0-9]$|^401$'; then
-  warn "Editor endpoint via editor.localhost did not respond in time; trying direct localhost:9090..."
-  if ! wait_for_http "Editor endpoint (localhost fallback)" "http://127.0.0.1:9090" 60 2 '^(2|3)[0-9][0-9]$|^401$'; then
+if ! wait_for_http "Editor endpoint (localhost)" "http://127.0.0.1:9090" 120 2 '^(2|3)[0-9][0-9]$|^401$'; then
+  warn "Editor endpoint via localhost did not respond in time; trying editor.localhost..."
+  if ! wait_for_http "Editor endpoint (editor.localhost fallback)" "http://editor.localhost:9090" 60 2 '^(2|3)[0-9][0-9]$|^401$'; then
     dump_cluster_diagnostics
     exit 3
   fi

@@ -58,14 +58,17 @@ The concepts in this architecture apply regardless of where you host Omniscope �
 
 The `keycloak.localhost` proxy is the most Docker Compose-specific piece of this reference architecture. In a production deployment, your OIDC provider has a public hostname that both browsers and your servers can reach directly with no proxy needed. The workaround exists here because Docker containers and the host browser live in different network namespaces and cannot share a simple `localhost` address.
 
-### Important for working copies (Docker Compose detail)
+### Docker Compose implementation detail: working-copy callback URLs
 
-Working-copy and project-push flows use server-side callbacks. That means Omniscope itself (inside the container), not just your browser, must be able to reach the project URL.
-This follows the recommended architecture principle: use one canonical URL per environment, and make sure that same URL is reachable both externally (browser) and internally (container network).
+Working-copy and project-push flows use server-side callbacks. That means Omniscope (inside the container), not only the browser, must be able to reach the project URL.
 
-- If a URL only works from the host browser but is not routable from inside the Docker network, working-copy actions can fail.
-- In this reference setup, use the same externally exposed Omniscope URL/port that is also resolvable inside Docker (`http://editor.localhost:9090` for editor, `http://viewer.localhost:9091` for viewer).
-- Avoid container-local `localhost` assumptions: inside a container, `localhost` means that same container, not your host machine.
+How this reference architecture implements that:
+
+- It uses one canonical URL per environment and keeps it routable from both browser and containers.
+- Editor URL: `http://editor.localhost:9090`
+- Viewer URL: `http://viewer.localhost:9091`
+- If a URL is browser-only and not reachable from inside Docker, working-copy actions can fail.
+- Do not rely on container-local `localhost` assumptions; inside a container, `localhost` means that same container, not the host machine.
 
 ### Two environments, one shared folder
 
@@ -297,15 +300,19 @@ Use it as the reference when configuring your own OIDC provider. You can also br
 
 Saved explorations (named and auto-saved) are stored inside the shared `files/` folder and work automatically across all viewer nodes with no extra configuration.
 
-### Recommended operational model: staging folder for data refresh
+### Two ways to work: staging folder vs. direct
 
-We recommend using a **staging subfolder** within the shared `files/` directory as the working area where editors refresh data. This prevents viewers from ever seeing partial or mid-refresh data.
+There are two ways editors and viewers can work with shared projects. We recommend the staging folder approach.
 
-The pattern works as follows:
+**Option A — Recommended: staging folder.** Editors work in a staging working copy that is linked to the master project in the root folder. Viewers only ever open the master project. Nothing the editor does in staging is visible to viewers until the editor explicitly pushes. This means viewers never see partial or mid-refresh data.
 
-1. The editor executes the workflow and refreshes data inside a staging subfolder — for example `files/staging/`. This subfolder should be configured in the editor's permissions so that viewer permission groups have no access to it.
-2. Once the refresh completes successfully, a **scheduler task on the editor node** copies or moves the updated project files from `files/staging/` into the main viewer-accessible folder — for example `files/reports/`.
-3. Viewer nodes pick up the updated files automatically within around 30 seconds — no viewer restart or manual intervention required.
+**Option B — Direct.** The editor and viewer both work with the same master project in the root folder. The editor opens the project, executes it or makes changes, and the viewer sees those changes automatically within approximately 30 seconds. There is no staging area and no push step. Viewers may briefly see partial data while the editor is executing, so this is not recommended for production.
+
+For step-by-step instructions for both approaches, see [Step 6 — Verify everything is working](#6--verify-everything-is-working) in the Quick Start guide.
+
+### Staging folder: how it works
+
+The staging folder uses Omniscope's **working copy** mechanism. The project inside staging is a linked copy of the master project in the root folder. Editors execute, modify, and validate in staging. When ready, they click **Push** in the workflow toolbar and the master project updates immediately. Viewers open the master project and see the updated version within approximately 30 seconds.
 
 This means:
 
@@ -314,6 +321,14 @@ This means:
 - **The move is atomic** — because the staging folder and the viewer folder are on the same shared filesystem, the move is a rename operation on the same device, which is instantaneous and safe
 
 > This pattern is not specific to this Docker Compose reference architecture — it applies to any Omniscope multi-node deployment regardless of how the shared filesystem is implemented (NFS, EFS, Azure Files, shared network drive, etc.).
+
+### Staging visibility model used in this reference setup
+
+- The `staging` folder is configured with **Hide in parent** enabled.
+- To inspect this setting: log in as `Admin` on the editor, open the `staging` folder, click the **profile icon** (top right), then click **Edit permissions**; the **Hide in parent** option is at the bottom.
+- This hides the folder from normal parent-folder browsing.
+- Editors access staging from the left sidebar through a configured **Virtual Root** named `Staging`. Virtual Roots are named shortcuts to specific folders and can be added, removed, or renamed from the admin section: **profile icon → Admin → Virtual Roots**.
+- Viewer users do not have access to staging, so they cannot open it from the sidebar.
 
 ---
 
@@ -369,6 +384,12 @@ This script is designed for **clean-slate testing**. Every time it runs it:
 
 > **⚠️ All data is destroyed on each run.** Projects, sessions, and any changes made during a previous run are wiped. This is intentional — the script is a test tool, not a persistent environment. To destroy the cluster and clean up at any time, run `cluster-test/delete.sh`.
 
+> **Troubleshooting (intermittent startup race):** If you see lines like `curl: (28) Operation timed out ...` during readiness checks, this is usually a transient host-endpoint timing issue during cold startup, not a broken deployment. Re-run:
+>
+> ```bash
+> ./scripts/local-test-compose-cluster.sh
+> ```
+
 ### 5 — Open the cluster
 
 **Environments**
@@ -392,7 +413,7 @@ Use these only for debugging node-specific behavior (for example, confirming whi
 
 | Username | Password | Logs in to |
 |---|---|---|
-| `editor-user` | `editor123` | Editor — <http://editor.localhost:9090> |
+| `editor-user-a` | `editor123` | Editor — <http://editor.localhost:9090> |
 | `editor-user-b` | `editor123` | Editor — <http://editor.localhost:9090> |
 | `viewer-user-a` | `viewer123` | Viewer — <http://viewer.localhost:9091> |
 | `viewer-user-b` | `viewer123` | Viewer — <http://viewer.localhost:9091> |
@@ -402,38 +423,89 @@ Use these only for debugging node-specific behavior (for example, confirming whi
 
 The cluster is pre-configured with Keycloak as its OIDC provider. No configuration changes are needed. Follow these steps to confirm that the editor, viewer cluster, shared files, and sticky session routing are all working correctly.
 
-**Step 1 — Import and run a project on the editor**
+There are two ways to work with this reference architecture. We recommend the **staging folder approach** (Option A), but both are documented below. Before testing either, complete the one-time data seeding step first.
 
-Open <http://editor.localhost:9090>, click **Use alternative login**, and log in as `Admin` / `admin1234`. Once inside, you will see `project.ioz` listed on the home screen. Click it to import the project, then open it and execute it and wait for it to finish. The project runs on the editor node.
+#### Prerequisites — seed project data
 
-> **Working-copy URL rule:** If you use features like **Make a Working Copy** or **Project Push**, the link Omniscope uses must be reachable from inside the Docker network as well as from your browser. In this setup, use `http://editor.localhost:9090/...` (not a host-only URL that containers cannot reach).
+This repository does **not** include pre-built project data files. The example ships without data so you must execute each project at least once to generate output. Do this once after every fresh cluster start.
 
-**Step 2 — Confirm the project is visible on the viewer**
+**Seed the root project**
 
-Open <http://viewer.localhost:9091> and log in as `viewer-user-a` / `viewer123`. The same project should appear — it is accessible because the editor and viewer nodes share the same `files/` directory. Viewer nodes are read-only, so `viewer-user-a` can open and it should open the Report showing the same Report.
+1. Open <http://editor.localhost:9090>.
+2. Log in as `editor-user-a`. The password is printed to the console when the cluster starts — check your terminal output.
+3. Click on the project to open it.
+4. Click the **blue Execute button** to run the project and generate its output data.
+5. When execution is complete, click the **Omniscope logo** in the top-left corner to return to the project list.
 
-**Step 3 — Open a second viewer session as viewer-user-b**
+**Seed the staging project**
 
-To get a genuinely independent session you need a separate cookie jar. A new tab in the same browser will not work — it shares the existing `OMNI_ROUTE` cookie and Keycloak session and will follow the same sticky route as `viewer-user-a`. Use one of these approaches instead:
+6. In the left sidebar, click **Staging** to open the Staging virtual root folder.
+7. Click on **[project] (working copy)** to open the staging working copy.
+8. Click the **blue Execute button** to execute the staging project.
 
-- **Recommended:** Use a completely different browser for each session — for example Chrome for `viewer-user-a` and Firefox for `viewer-user-b`.
-- **Alternative:** Use a private or incognito window. Most browsers give incognito windows a clean cookie store that is isolated from the normal session.
+Both projects are now seeded with data. The root folder project is what viewers will open. The staging working copy is linked to that root project and is what editors use to prepare and validate changes before publishing.
 
-Go to <http://viewer.localhost:9091> in the second browser and log in as `viewer-user-b` / `viewer123`. OpenResty assigns the new session to a viewer node via round-robin and pins it there with a fresh `OMNI_ROUTE` cookie. Depending on timing, `viewer-user-b` may land on a different node than `viewer-user-a`.
+**Confirm the viewer is working before making any changes**
 
-**Step 4 — Confirm sticky session routing via browser DevTools**
+Before testing either workflow, first verify that the viewer can open the seeded data. Open <http://viewer.localhost:9091> in a **different browser or browser profile**. Log in as a viewer user (e.g. `viewer-user-a` / `viewer123`) and open the project. You should see the data produced by the seeding step above. Keep this browser window open — you will use it to confirm changes in the steps below.
 
-To see which node is serving each session, open browser DevTools (F12) and go to the Network tab. Click any request in the list and inspect its response headers. OpenResty adds an `X-Served-By` header to every proxied response, containing the upstream address of the node that handled the request — for example `omniscope-viewer-1:9090` or `omniscope-viewer-2:9090`.
+---
 
-If `viewer-user-a` and `viewer-user-b` show different `X-Served-By` values, they are being served by different nodes and sticky session routing is working correctly.
+#### Option A — Recommended: using the staging folder
 
-**Step 5 — Make a visual change on the editor and see it propagate to both viewers**
+This is the approach we recommend. The project inside the staging folder is a **working copy** linked to the master project in the root folder — the one that viewers open. The editor works entirely within the staging copy: executing the workflow, adding or modifying report views, and validating the result. Nothing the editor does is visible to viewers until the editor explicitly pushes. At that point the root folder project updates automatically and viewers will see the new version within approximately 30 seconds.
 
-Leave both viewer windows open. Go back to the editor and open the project. Add a new view — for example a bar chart — or change an existing visualisation. Save the project. You do not need to re-execute it for layout and view changes to be picked up. Within around 30 seconds both viewer nodes will detect that the project file has changed and refresh automatically. You should see the new view appear in both viewer windows without reloading the page.
+**Step 1 — Open the staging working copy on the editor**
 
-**Step 6 — Re-execute the project on the editor and see the data update on both viewers**
+On the editor (<http://editor.localhost:9090>), click **Staging** in the left sidebar to open the staging virtual root folder. Click on **[project] (working copy)** to open it.
 
-Still on the editor, open the workflow and edit the `Random sample` block. Change the `percentage to keep` value so the workflow outputs a different number of records, then execute the project again and wait for it to finish. Once execution completes, the updated output files are written to the shared `files/` directory. Within around 30 seconds both viewer nodes should pick up the new data and update what is shown to `viewer-user-a` and `viewer-user-b`. This confirms that the full pipeline — editor executes, shared files update, viewer nodes refresh — is working end to end across all three nodes.
+> **How the Staging entry appears in the sidebar:** The left sidebar shows **Virtual Roots** — named shortcuts to specific folders that can be configured per user or group. The **Staging** entry is a Virtual Root pointing at the staging folder. You can add, remove, or rename Virtual Roots from the admin section: click the **profile icon** (top right) → **Admin** → **Virtual Roots**. This is how editors get direct sidebar access to the staging folder without it appearing in the main project list that viewers browse.
+
+**Step 2 — Test a data refresh: execute and push**
+
+Run the workflow to refresh the data. When execution is complete, go to the workflow tab and click **Push** in the toolbar. Switch to your viewer browser and open the project — within approximately 30 seconds you should see the updated data. This confirms the data refresh path is working end to end.
+
+> **Working-copy URL rule:** Push and pull callbacks are server-side operations. The project URL must be reachable from inside Docker, not just from your browser. Always use `http://editor.localhost:9090/...` — do not use container-local addresses.
+
+**Step 3 — Test a report edit: add a view and push**
+
+Go back to the editor and open the staging working copy again. Open a report and add or modify a view — for example, add a new chart or table. Once done, push the change to master: go to the workflow tab and click **Push**. Switch to your viewer browser and refresh the project — within approximately 30 seconds the new or modified view should appear in the report.
+
+> **Tip — Pin the report for easier pushing:** If you want to push without navigating away from the report, click the **three-dot menu** inside the report and select **Pin**. This keeps the workflow toolbar visible alongside the report so you can click **Push** directly from that view without switching tabs.
+
+**Step 4 — Optionally use the scheduler**
+
+Instead of executing manually each time, you can automate the staging refresh using the built-in scheduler. In the editor, click the **scheduler icon** in the left sidebar. You will see a pre-configured scheduled action for the staging project. Click the **play button** to trigger an ad hoc run — this executes the staging workflow automatically, as if you had done it by hand. You can also configure it to run on a recurring schedule for nightly or hourly automated refreshes.
+
+The scheduler action also includes a pre-configured **failure notification**. Add your email address to the failure action and Omniscope will send you an alert if the scheduled refresh fails, and a confirmation when it succeeds.
+
+Once the scheduled refresh has run and you are happy with the result, open the staging project, review it, and click **Push** in the workflow toolbar to deploy to the master location that viewers have open.
+
+---
+
+#### Option B — Without staging (direct workflow)
+
+In this simpler approach the editor and viewer both work with the same master project in the root folder directly. The editor opens that project, executes it or makes report changes, and those changes are reflected on the viewer within approximately 30 seconds. There is no staging area and no push step.
+
+This means viewers may briefly see partial or mid-refresh data while the editor is executing, which is why we do not recommend this approach for production. It is useful for understanding the basic shared-file model or for simple setups where that trade-off is acceptable.
+
+**Step 1 — Open the root project on the editor**
+
+Open <http://editor.localhost:9090> and log in as `editor-user-a` (password shown in console logs when the cluster starts). Click on the project in the root folder to open it.
+
+**Step 2 — Test a data refresh: execute**
+
+Run the workflow to refresh the data. Switch to your viewer browser (already open from the seeding confirmation step above) and watch the project — within approximately 30 seconds the viewer will reflect the updated data automatically, with no push required.
+
+**Step 3 — Test a report edit: add a view**
+
+Go back to the editor and open a report. Add or modify a view — for example, add a new chart or table. Switch to your viewer browser — within approximately 30 seconds the new or modified view will appear in the report automatically.
+
+> The viewer and editor are pointing at the same file in the shared folder. There is no push step — changes go live as soon as the editor executes or saves.
+
+**Step 4 — Optionally use the scheduler**
+
+You can also trigger the refresh via the scheduler rather than executing manually. In the editor, click the **scheduler icon** in the left sidebar and click the **play button** next to the non-staging scheduled action. The root folder project will refresh and viewers will see the result within approximately 30 seconds.
 
 ### 7 — Stop and destroy the cluster
 

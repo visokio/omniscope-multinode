@@ -5,7 +5,7 @@
       <networkingConfig>
         <servernetworking runWebServer="true" allowLocalhostDesktopExperience="false" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" enableHttp2="true" redirectHttpToHttps="false" enableWebSocket="true" enableWebSocketCompression="true" enableSingleSessionPerIdentity="false">
           <sslContext>
-            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:JvOb2/ZdmwJFRZxHctsfyxRm4gYxp8tPL9/CNH294sQ=" keyManagerPassword="\OE:z3EIgOw+B/zGhaW/9Q7EHTRiwcB8EBXd2gl86XtWNsw=" />
+            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:EM0B5urGK2K/M3nWksFJqWxZGaWxMAVIwhUHV4yJVhY=" keyManagerPassword="\OE:Tlnz76K7vH7xBnad6rHbRRxJ4XH/pu+TsQCvccdeeh8=" />
           </sslContext>
           <redirectConfig>
             <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -73,7 +73,7 @@
             </group>
             <group enabled="true" name="Project editor">
               <permissions>
-                <permissions listDirectory="true" downloadFile="true" viewInMobile="true" datamanager="true" datamanagerViewOnly="false" editReport="true" fileManagement="true" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="true" designViews="true" projectPublisher="true" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="true" editBookmarks="true" adminServerGlobal="false" adminScheduler="false" adminPermissions="false" adminBranding="false" />
+                <permissions listDirectory="true" downloadFile="true" viewInMobile="true" datamanager="true" datamanagerViewOnly="false" editReport="true" fileManagement="true" getStatic="true" viewServerState="false" exportData="true" sharedReportDataRefresh="true" designViews="true" projectPublisher="true" workflowExecutionViaPublicApis="false" workflowParametersAccessViaPublicApis="false" editDataViaApis="true" editBookmarks="true" adminServerGlobal="false" adminScheduler="true" adminPermissions="false" adminBranding="false" />
               </permissions>
               <mechanisms>
                 <OpenIDConnectMechanism mechanismName="OpenID Connect">
@@ -87,7 +87,7 @@
           <openIDConnectSettings>
             <oidcSettings enabled="true" redirectToProviderForLoginAutomatically="false">
               <providers>
-                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Giwee Fawue Rykea Ryhoi Digou Kakei Lysaa Fepou Hyjee Pyrae Fesoi Mivue Letuu Fenaa Dynoe Kawoe Ganoi Denai Rapoa Pyfua Hykou Kadeu Sijae Vypaa Giveu Dajoa P" clientSecretNew="\OE:AYid5CBDM3OEnoPNPJg2BkvDBMx+yWl6AYOvVtKU2I5/BsybBiC9tsjQSIEmJhK2vr4ODRFzRUyy8mkhKva3Gw==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
+                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Jepai Jyjuu Hexoi Pyroe Nygou Darai Pifui Panuu Petoa Pitee Lenoa Vehoi Wyrai Nyjou Kewue Sakeu Sivue Matue Baxoe Wivee Tasei Vyxaa Maxae Pydoi Rawua Vesuu P" clientSecretNew="\OE:9u4iwLulg2ppjiStEIpyzBDpXBTSNR8BNQxMaRQdZ49QStHbe9rsk9hTLl4mrks1q0T9TUXQERWcpYpsjGmRGQ==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
               </providers>
             </oidcSettings>
           </openIDConnectSettings>
@@ -121,7 +121,7 @@
       </defaultFolderConfig>
       <neverCleans />
       <sslContext>
-        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:DphfgTKe8VM5aGkL7g0SUV3F2zsgonCLwQZ8Wup+nn0=" keyManagerPassword="\OE:EZ5sWew/WfpxQVvpSbjeyFb5rdiocSRf+BgvE1eZrzw=" />
+        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:3H6Fmg4AaKf274YCZpgHt5Ri4RF77bC0RJ2Ps7I67wE=" keyManagerPassword="\OE:Y2kfh+OH0WWvjzV+UcBciQvIjs0hNRFBFw3JPLgLK7E=" />
       </sslContext>
       <redirectConfig>
         <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -129,7 +129,28 @@
     </mobilewebserver>
   </mobileWebServerConfig>
   <tasks>
-    <schedulerTask name="Project refresh" enabled="true" isWebBasedUiTask="true" timeOut="300" skipIfDelayedBy="0" warnIfDelayedBy="0">
+    <schedulerTask name="Project refresh main" enabled="false" isWebBasedUiTask="true" timeOut="300" skipIfDelayedBy="0" warnIfDelayedBy="0">
+      <action>
+        <schedulerChainAction title="Task action" logTimings="false" timeOut="0" numberOfRetriesOnFailure="0" sleepBeforeRetryingOnFailure="2" propagateFailure="true" chainRepetitions="1">
+          <actions>
+            <schedulerIOXFileAction source="/home/omniscope/omniscope-server/files/Project.iox" logTimings="false" customTitle="Project (IOX file) action">
+              <subActions>
+                <executeBlocks blockNames="" failOnError="true" reExecuteEverythingUpstream="true" maxRetryForIsWorkflowBusy="5" executeBlocksOneByOne="false" customTitle="Execute blocks" />
+              </subActions>
+            </schedulerIOXFileAction>
+          </actions>
+          <failureAction>
+            <schedulerSendEmailAction mailServerPort="25" useSSL="false" useTLS="false" customTitle="Email action">
+              <fileAttachments />
+            </schedulerSendEmailAction>
+          </failureAction>
+        </schedulerChainAction>
+      </action>
+      <recurrences>
+        <schedulerRecurrence startDate="1772531820000" endDate="9223372036854775807" increment="1" calendarUnit="3" />
+      </recurrences>
+    </schedulerTask>
+    <schedulerTask name="Project refresh staging" enabled="false" isWebBasedUiTask="true" timeOut="300" skipIfDelayedBy="0" warnIfDelayedBy="0">
       <action>
         <schedulerChainAction title="Task action" logTimings="false" timeOut="0" numberOfRetriesOnFailure="0" sleepBeforeRetryingOnFailure="2" propagateFailure="true" chainRepetitions="1">
           <actions>
