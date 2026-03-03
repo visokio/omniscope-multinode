@@ -1,7 +1,11 @@
 # Licence files — never commit, always mount at runtime
 *.lic
-cluster-data/editor/licence/
-cluster-data/viewer/licence/
+cluster-data/editor/licence/*
+cluster-data/viewer/licence/*
+!cluster-data/editor/licence/.gitkeep
+!cluster-data/viewer/licence/.gitkeep
+!cluster-data/editor/licence/README.md
+!cluster-data/viewer/licence/README.md
 
 # Omniscope server runtime data — generated on first start, not committed
 # (use ** so individual files can be un-ignored below)
