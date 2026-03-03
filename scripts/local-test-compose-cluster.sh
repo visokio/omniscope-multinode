@@ -248,8 +248,9 @@ export VIEWER_NODE_1_LOGS="${VIEWER_NODE_1_LOGS}"
 export VIEWER_NODE_2_LOGS="${VIEWER_NODE_2_LOGS}"
 export VIEWER_NODE_1_ERROR_REPORTS="${VIEWER_NODE_1_ERROR_REPORTS}"
 export VIEWER_NODE_2_ERROR_REPORTS="${VIEWER_NODE_2_ERROR_REPORTS}"
-docker compose -f "${COMPOSE_FILE}" -p "${PROJECT_NAME}" down --remove-orphans
-docker network prune -f
+# Also remove project volumes and the project network explicitly.
+docker compose -f "${COMPOSE_FILE}" -p "${PROJECT_NAME}" down --remove-orphans --volumes >/dev/null 2>&1 || true
+docker network rm "${PROJECT_NAME}_omniscope-net" >/dev/null 2>&1 || true
 rm -rf "${TEST_DIR}"
 echo "Cluster destroyed and cluster-test/ removed."
 DELETESCRIPT
@@ -328,8 +329,11 @@ if ! wait_for_http "OpenResty edge (viewer/keycloak only)" "http://viewer.localh
   exit 3
 fi
 if ! wait_for_http "Editor endpoint" "http://editor.localhost:9090" 120 2 '^(2|3)[0-9][0-9]$|^401$'; then
-  dump_cluster_diagnostics
-  exit 3
+  warn "Editor endpoint via editor.localhost did not respond in time; trying direct localhost:9090..."
+  if ! wait_for_http "Editor endpoint (localhost fallback)" "http://127.0.0.1:9090" 60 2 '^(2|3)[0-9][0-9]$|^401$'; then
+    dump_cluster_diagnostics
+    exit 3
+  fi
 fi
 if ! wait_for_http "Viewer endpoint" "http://viewer.localhost:9091"; then
   dump_cluster_diagnostics

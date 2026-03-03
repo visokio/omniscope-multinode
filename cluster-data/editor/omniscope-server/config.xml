@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schedulerConfig configurationFilePath="/home/omniscope/omniscope-server/config.xml" port="24679" watchFolder="watch" watchPollingInterval="5000" forkScheduledExecution="false" _visokio_app_version="2026.1-preview b22429">
+<schedulerConfig configurationFilePath="/home/omniscope/omniscope-server/config.xml" port="24679" watchFolder="/home/omniscope/omniscope-server/watch/" watchPollingInterval="5000" forkScheduledExecution="false" _visokio_app_version="2026.1-preview b22429">
   <globalConfig>
     <serverGlobalConfig logLevel="INFO" logAiBlockInDiagnosticMode="false" logSupportNinjaChats="false" persistAiDebugInLogs="false" useCustomLibraryBlockPath="false" isBlocksLibraryProtected="false" useSpecificRVersionForBuildInBlocks="false" useRExecutableFolder="false" useRLibraryFolder="false" usePythonExecutableFolder="false" usePythonLibraryFolder="false" customBlockExecutionEnvironment="HOST_UNRESTRICTED" visokioGeneratedImagesMaxDiskSpaceGB="5.0" hideCommunityBlocks="false">
       <networkingConfig>
         <servernetworking runWebServer="true" allowLocalhostDesktopExperience="false" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" enableHttp2="true" redirectHttpToHttps="false" enableWebSocket="true" enableWebSocketCompression="true" enableSingleSessionPerIdentity="false">
           <sslContext>
-            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:68UAPfgLKTwrKMUKKtUFDyjOXiaykBbLwmW99ogPmNY=" keyManagerPassword="\OE:nHWncMPHSxV/b9TBLxPlsNKmr8V0mYJlozU11q4esTw=" />
+            <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:JvOb2/ZdmwJFRZxHctsfyxRm4gYxp8tPL9/CNH294sQ=" keyManagerPassword="\OE:z3EIgOw+B/zGhaW/9Q7EHTRiwcB8EBXd2gl86XtWNsw=" />
           </sslContext>
           <redirectConfig>
             <redirectConfig enabled="false" newContextURL="/" permanent="false" />
@@ -87,7 +87,7 @@
           <openIDConnectSettings>
             <oidcSettings enabled="true" redirectToProviderForLoginAutomatically="false">
               <providers>
-                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Netea Risua Tygei Mefue Syjuu Nywae Nyfai Lafoe Japui Hybee Jisee Famua Behoi Dihoe Jymou Daxai Savuu Kenua Haroa Bipui Mywau Hyxea Garoi Litoi Lihui Nyfaa B" clientSecretNew="\OE:cQSHu663Z/ko1POd/r5IKV7UHdohh1AKEqtjgL7pzKjQV5lkjTZe7OWoVk2j3hVRtsd4rSScNunzkL70yG97WA==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
+                <oidcProviderKeycloak issuerUri="http://keycloak.localhost:9900/realms/visokio/" clientId="omniscope-editor" clientSecret="Giwee Fawue Rykea Ryhoi Digou Kakei Lysaa Fepou Hyjee Pyrae Fesoi Mivue Letuu Fenaa Dynoe Kawoe Ganoi Denai Rapoa Pyfua Hykou Kadeu Sijae Vypaa Giveu Dajoa P" clientSecretNew="\OE:AYid5CBDM3OEnoPNPJg2BkvDBMx+yWl6AYOvVtKU2I5/BsybBiC9tsjQSIEmJhK2vr4ODRFzRUyy8mkhKva3Gw==" loginMode="IMPLICIT_SSO_ALWAYS" logoutMode="PROVIDER" expiry="36000" refreshMode="KEEP" allowUnverifiedEmails="false" customScopes="roles" />
               </providers>
             </oidcSettings>
           </openIDConnectSettings>
@@ -121,12 +121,34 @@
       </defaultFolderConfig>
       <neverCleans />
       <sslContext>
-        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:AQ77c17kJ6ouGfwR4yLJDqu2NMQS4ZRo5XW7fRsHBEk=" keyManagerPassword="\OE:Cs2hUnifGABIheskVJ3Mo1At0yB3jjx9QmKKLqhg8kA=" />
+        <sslContext keyStorePath="keystore.jks" keyStorePassword="\OE:DphfgTKe8VM5aGkL7g0SUV3F2zsgonCLwQZ8Wup+nn0=" keyManagerPassword="\OE:EZ5sWew/WfpxQVvpSbjeyFb5rdiocSRf+BgvE1eZrzw=" />
       </sslContext>
       <redirectConfig>
         <redirectConfig enabled="false" newContextURL="/" permanent="false" />
       </redirectConfig>
     </mobilewebserver>
   </mobileWebServerConfig>
-  <tasks />
+  <tasks>
+    <schedulerTask name="Project refresh" enabled="true" isWebBasedUiTask="true" timeOut="300" skipIfDelayedBy="0" warnIfDelayedBy="0">
+      <action>
+        <schedulerChainAction title="Task action" logTimings="false" timeOut="0" numberOfRetriesOnFailure="0" sleepBeforeRetryingOnFailure="2" propagateFailure="true" chainRepetitions="1">
+          <actions>
+            <schedulerIOXFileAction source="/home/omniscope/omniscope-server/files/staging/Project (working copy).iox" logTimings="false" customTitle="Project (IOX file) action">
+              <subActions>
+                <executeBlocks blockNames="" failOnError="true" reExecuteEverythingUpstream="true" maxRetryForIsWorkflowBusy="5" executeBlocksOneByOne="false" customTitle="Execute blocks" />
+              </subActions>
+            </schedulerIOXFileAction>
+          </actions>
+          <failureAction>
+            <schedulerSendEmailAction mailServerPort="25" useSSL="false" useTLS="false" customTitle="Email action">
+              <fileAttachments />
+            </schedulerSendEmailAction>
+          </failureAction>
+        </schedulerChainAction>
+      </action>
+      <recurrences>
+        <schedulerRecurrence startDate="1772531820000" endDate="9223372036854775807" increment="1" calendarUnit="3" />
+      </recurrences>
+    </schedulerTask>
+  </tasks>
 </schedulerConfig>
