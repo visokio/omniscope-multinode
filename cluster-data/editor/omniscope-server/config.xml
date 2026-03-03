@@ -150,26 +150,5 @@
         <schedulerRecurrence startDate="1772531820000" endDate="9223372036854775807" increment="1" calendarUnit="3" />
       </recurrences>
     </schedulerTask>
-    <schedulerTask name="Project refresh staging" enabled="false" isWebBasedUiTask="true" timeOut="300" skipIfDelayedBy="0" warnIfDelayedBy="0">
-      <action>
-        <schedulerChainAction title="Task action" logTimings="false" timeOut="0" numberOfRetriesOnFailure="0" sleepBeforeRetryingOnFailure="2" propagateFailure="true" chainRepetitions="1">
-          <actions>
-            <schedulerIOXFileAction source="/home/omniscope/omniscope-server/files/staging/Project (working copy).iox" logTimings="false" customTitle="Project (IOX file) action">
-              <subActions>
-                <executeBlocks blockNames="" failOnError="true" reExecuteEverythingUpstream="true" maxRetryForIsWorkflowBusy="5" executeBlocksOneByOne="false" customTitle="Execute blocks" />
-              </subActions>
-            </schedulerIOXFileAction>
-          </actions>
-          <failureAction>
-            <schedulerSendEmailAction mailServerPort="25" useSSL="false" useTLS="false" customTitle="Email action">
-              <fileAttachments />
-            </schedulerSendEmailAction>
-          </failureAction>
-        </schedulerChainAction>
-      </action>
-      <recurrences>
-        <schedulerRecurrence startDate="1772531820000" endDate="9223372036854775807" increment="1" calendarUnit="3" />
-      </recurrences>
-    </schedulerTask>
   </tasks>
 </schedulerConfig>

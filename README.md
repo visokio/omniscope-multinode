@@ -474,14 +474,6 @@ Go back to the editor and open the staging working copy again. Open a report and
 
 > **Tip — Pin the report for easier pushing:** If you want to push without navigating away from the report, click the **three-dot menu** inside the report and select **Pin**. This keeps the workflow toolbar visible alongside the report so you can click **Push** directly from that view without switching tabs.
 
-**Step 4 — Optionally use the scheduler**
-
-Instead of executing manually each time, you can automate the staging refresh using the built-in scheduler. In the editor, click the **scheduler icon** in the left sidebar. You will see a pre-configured scheduled action for the staging project. Click the **play button** to trigger an ad hoc run — this executes the staging workflow automatically, as if you had done it by hand. You can also configure it to run on a recurring schedule for nightly or hourly automated refreshes.
-
-The scheduler action also includes a pre-configured **failure notification**. Add your email address to the failure action and Omniscope will send you an alert if the scheduled refresh fails, and a confirmation when it succeeds.
-
-Once the scheduled refresh has run and you are happy with the result, open the staging project, review it, and click **Push** in the workflow toolbar to deploy to the master location that viewers have open.
-
 ---
 
 #### Option B — Without staging (direct workflow)
@@ -504,7 +496,9 @@ Go back to the editor and open a report. Add or modify a view — for example, a
 
 **Step 4 — Optionally use the scheduler**
 
-You can also trigger the refresh via the scheduler rather than executing manually. In the editor, click the **scheduler icon** in the left sidebar and click the **play button** next to the non-staging scheduled action. The root folder project will refresh and viewers will see the result within approximately 30 seconds.
+You can automate the refresh using the built-in scheduler. In the editor, click the **scheduler icon** in the left sidebar. You will see a pre-configured scheduled action for this workflow. The task is **disabled by default** — enable it and configure the schedule to match your requirements (for example, nightly or hourly). Click the **play button** to trigger an ad hoc run at any time — this executes the root project automatically, as if you had done it by hand.
+
+The scheduler action includes a pre-configured **failure notification**. Please configure the failure action with your own email settings — once set up, Omniscope will send you an alert if the scheduled refresh fails. You can also add a success email action after the project action in the scheduler to track that the refresh completed successfully. Viewers will see the updated data within approximately 30 seconds of the scheduled run completing.
 
 ### 7 — Stop and destroy the cluster
 
