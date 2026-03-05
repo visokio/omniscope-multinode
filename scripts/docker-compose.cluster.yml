@@ -54,8 +54,9 @@
 #     viewer/omniscope-server/           Seeded from cluster-data/, runtime writes here
 #     viewer/nodes/node-{1,2}/logs/      Per-node logs
 #     viewer/nodes/node-{1,2}/error reports/  Per-node error reports
-#     shared/files/                      Shared projects (editor + all viewers)
-#     shared/files/.tmp/                 JVM temp dir (inside files/ mount)
+#     shared/                            Single mount (files/ + tmp/ as siblings)
+#     shared/files/                      Shared projects (editor + all viewers) — web-exposed
+#     shared/tmp/                       JVM temp dir (sibling of files/, NOT web-exposed)
 #     keycloak/data/                     Keycloak PostgreSQL DB (rebuilt from realm.json)
 #
 # HOW TO RUN
@@ -216,12 +217,10 @@ services:
       # Pass JVM args via JAVA_TOOL_OPTIONS so the JVM applies them on startup.
       # This works with the current upstream image/entrypoint without customization.
       # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
-      # Keep temp files inside the shared files/ mount.
-      # Use a dedicated subdir so editor temp files are isolated from viewer nodes.
       # Align image healthcheck probe port with Omniscope's configured HTTP port.
       OMNI_HTTP_PORT: "9090"
       JAVA_TOOL_OPTIONS: >-
-        -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/editor
+        -Djava.io.tmpdir=/home/omniscope/omniscope-server/shared/tmp/editor
     ports:
       - "9090:9090"
     volumes:
@@ -230,10 +229,10 @@ services:
         source: ${EDITOR_OMNISCOPE_SERVER}
         target: /home/omniscope/omniscope-server
 
-      # Shared projects directory only (includes files/.tmp JVM temp dir).
+      # Shared directory: files/ (projects) and tmp/ (JVM temp) on a single mount.
       - type: bind
-        source: ${SHARED_FILES_DIR}
-        target: /home/omniscope/omniscope-server/files
+        source: ${SHARED_DIR}
+        target: /home/omniscope/omniscope-server/shared
 
       # Editor cluster licence file
       - type: bind
@@ -276,14 +275,12 @@ services:
     environment:
       # Pass JVM args via JAVA_TOOL_OPTIONS so the JVM applies them on startup.
       # Verify at runtime in logs: "Picked up JAVA_TOOL_OPTIONS: ..."
-      # Viewer mode.
-      # Keep tmp inside files/ so atomic rename() stays within the same mount.
-      # Use a per-node tmp subdir to isolate temp artifacts across viewer nodes.
+      # Viewer mode. Per-node tmp subdir inside shared/tmp/.
       # Align image healthcheck probe port with Omniscope's configured HTTP port.
       OMNI_HTTP_PORT: "9090"
       JAVA_TOOL_OPTIONS: >-
         -Domniscope.nodeType=viewer
-        -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-1
+        -Djava.io.tmpdir=/home/omniscope/omniscope-server/shared/tmp/viewer-1
     ports:
       # Direct node access for debugging (bypasses OpenResty sticky routing).
       - "127.0.0.1:19091:9090"
@@ -303,10 +300,10 @@ services:
         source: ${VIEWER_NODE_1_ERROR_REPORTS}
         target: "/home/omniscope/Visokio Error Reports"
 
-      # Shared projects directory only.
+      # Shared directory: files/ (projects) and tmp/ (JVM temp) on a single mount.
       - type: bind
-        source: ${SHARED_FILES_DIR}
-        target: /home/omniscope/omniscope-server/files
+        source: ${SHARED_DIR}
+        target: /home/omniscope/omniscope-server/shared
 
       # Viewer cluster licence file (shared across all viewer nodes)
       - type: bind
@@ -333,7 +330,7 @@ services:
       OMNI_HTTP_PORT: "9090"
       JAVA_TOOL_OPTIONS: >-
         -Domniscope.nodeType=viewer
-        -Djava.io.tmpdir=/home/omniscope/omniscope-server/files/.tmp/viewer-2
+        -Djava.io.tmpdir=/home/omniscope/omniscope-server/shared/tmp/viewer-2
     ports:
       # Direct node access for debugging (bypasses OpenResty sticky routing).
       - "127.0.0.1:19092:9090"
@@ -348,8 +345,8 @@ services:
         source: ${VIEWER_NODE_2_ERROR_REPORTS}
         target: "/home/omniscope/Visokio Error Reports"
       - type: bind
-        source: ${SHARED_FILES_DIR}
-        target: /home/omniscope/omniscope-server/files
+        source: ${SHARED_DIR}
+        target: /home/omniscope/omniscope-server/shared
       - type: bind
         source: ../cluster-data/viewer/licence
         target: /home/omniscope/.visokioappdata/Visokio/Omniscope/licenses

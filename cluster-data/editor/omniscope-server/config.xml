@@ -23,7 +23,7 @@
     </serverGlobalConfig>
   </globalConfig>
   <mobileWebServerConfig>
-    <mobilewebserver folder="files" macrosFolder="Macros" showAppName="true" showVisokioBrandingAndResources="true" hideAttributionLogo="false" allowServerWritePermission="true" maxUploadSizeInMB="500" allowUsingFilesOutsideSharingFolder="false" allowFeedbackOption="true" allowAppTour="true" allowRenderInAnyIframe="false" maskVersion="false" hideBranchNameFromVersion="false" hideVisokioProjectTemplates="false" workflowDataCompression="NONE" maxConcurrentWorkflowJobs="1" enableWorkflowExecutionInMemoryEngine="false" workflowExecutionInMemoryFileSystemSizeMb="4096" workflowExecutionInMemoryPerProjectCacheSizeMb="1024" enableWorkflowExecutionDataCaching="false" enableWorkflowExecutionParallelExec="false" enableWorkflowStatsRecording2="true" enableWorkflowRepeatabilityChecker="false" enableFormulaStatsRecording="false" enableSchedulerApi="true" enableWorkflowApi="true" enableWorkflowGrid="true" useQueryCache2="false" queryCacheMemoryLimitMonitoredMb="75" queryCacheMemoryLimitUnmonitoredMb="25" projectDormancy="ONE_WEEK" gaEnableExtendedTracking="false" gaDebugMode="false" shareAnonymousUsageData="true" shareMachineIdForUsageTracking="false" allowLoadCredentialsFromAmazonEC2MetadataService="false" allowLoadCredentialsFromGoogleComputeEngine="false" keepHiddenAppsConnectedOnDesktop="false" enableUnauthenticatedGlobalResources="false" enableApiMetadataPagesAndEndpoints="true" enableProjectHistory="true" deleteHistoryAfter="NEVER" historyGranularity="HIGH" projectAutomationEnabled="true" minimumAutomationFrequency="SECOND" enable="true" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" redirectHttpToHttps="false">
+    <mobilewebserver folder="shared/files" macrosFolder="Macros" showAppName="true" showVisokioBrandingAndResources="true" hideAttributionLogo="false" allowServerWritePermission="true" maxUploadSizeInMB="500" allowUsingFilesOutsideSharingFolder="false" allowFeedbackOption="true" allowAppTour="true" allowRenderInAnyIframe="false" maskVersion="false" hideBranchNameFromVersion="false" hideVisokioProjectTemplates="false" workflowDataCompression="NONE" maxConcurrentWorkflowJobs="1" enableWorkflowExecutionInMemoryEngine="false" workflowExecutionInMemoryFileSystemSizeMb="4096" workflowExecutionInMemoryPerProjectCacheSizeMb="1024" enableWorkflowExecutionDataCaching="false" enableWorkflowExecutionParallelExec="false" enableWorkflowStatsRecording2="true" enableWorkflowRepeatabilityChecker="false" enableFormulaStatsRecording="false" enableSchedulerApi="true" enableWorkflowApi="true" enableWorkflowGrid="true" useQueryCache2="false" queryCacheMemoryLimitMonitoredMb="75" queryCacheMemoryLimitUnmonitoredMb="25" projectDormancy="ONE_WEEK" gaEnableExtendedTracking="false" gaDebugMode="false" shareAnonymousUsageData="true" shareMachineIdForUsageTracking="false" allowLoadCredentialsFromAmazonEC2MetadataService="false" allowLoadCredentialsFromGoogleComputeEngine="false" keepHiddenAppsConnectedOnDesktop="false" enableUnauthenticatedGlobalResources="false" enableApiMetadataPagesAndEndpoints="true" enableProjectHistory="true" deleteHistoryAfter="NEVER" historyGranularity="HIGH" projectAutomationEnabled="true" minimumAutomationFrequency="SECOND" enable="true" bindAddress="*" enableHttp="true" port="9090" enableHttps="false" httpsport="8443" redirectHttpToHttps="false">
       <projectWhitelistResourcesAccessCriteria>
         <ProjectWhitelistResourceAccessCriteria allowUsingFilesOutsideSharingFolder="false">
           <administrativeProjectsWhitelistResources>
@@ -44,7 +44,7 @@
           <folders>
             <VirtualRoot displayName="Staging">
               <folder>
-                <LocalFileLocationOptions __2n_location="/home/omniscope/omniscope-server/files/staging/" />
+                <LocalFileLocationOptions __2n_location="/home/omniscope/omniscope-server/shared/files/staging/" />
               </folder>
             </VirtualRoot>
           </folders>
@@ -133,7 +133,7 @@
       <action>
         <schedulerChainAction title="Task action" logTimings="false" timeOut="0" numberOfRetriesOnFailure="0" sleepBeforeRetryingOnFailure="2" propagateFailure="true" chainRepetitions="1">
           <actions>
-            <schedulerIOXFileAction source="/home/omniscope/omniscope-server/files/Project.iox" logTimings="false" customTitle="Project (IOX file) action">
+            <schedulerIOXFileAction source="/home/omniscope/omniscope-server/shared/files/Project.iox" logTimings="false" customTitle="Project (IOX file) action">
               <subActions>
                 <executeBlocks blockNames="" failOnError="true" reExecuteEverythingUpstream="true" maxRetryForIsWorkflowBusy="5" executeBlocksOneByOne="false" customTitle="Execute blocks" />
               </subActions>

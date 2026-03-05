@@ -189,8 +189,7 @@ log "Seeded viewer omniscope-server from cluster-data/"
 
 # ------------------------------------------------------------------------------
 # Per-viewer-node log and error report directories (each node gets its own).
-# JVM tmp goes to files/.tmp (inside the same files mount) —
-# same device, so atomic rename() for project saves works correctly.
+# JVM tmp goes to shared/tmp/ on the same mount as shared/files/.
 # ------------------------------------------------------------------------------
 export VIEWER_NODE_1_LOGS="${TEST_DIR}/viewer/nodes/node-1/logs"
 export VIEWER_NODE_2_LOGS="${TEST_DIR}/viewer/nodes/node-2/logs"
@@ -203,19 +202,13 @@ mkdir -p \
   "${VIEWER_NODE_2_ERROR_REPORTS}"
 
 # ------------------------------------------------------------------------------
-# Shared files directory mounted into /home/omniscope/omniscope-server/files on editor and viewers.
-# files/.tmp is JVM temp dir, kept inside the same mount as projects for atomic rename.
+# Shared directory mounted into /home/omniscope/omniscope-server/shared on editor and viewers.
+# Contains files/ (projects) and tmp/ (JVM temp) as siblings on a single mount.
 # ------------------------------------------------------------------------------
-export SHARED_FILES_DIR="${TEST_DIR}/shared/files"
-mkdir -p "${SHARED_FILES_DIR}" "${SHARED_FILES_DIR}/.tmp"
-cp -r "${REPO_ROOT}/cluster-data/shared/files/." "${SHARED_FILES_DIR}/"
-mkdir -p "${SHARED_FILES_DIR}/.tmp"
-# Per-node JVM temp subdirs (all inside the same shared files mount).
-mkdir -p \
-  "${SHARED_FILES_DIR}/.tmp/editor" \
-  "${SHARED_FILES_DIR}/.tmp/viewer-1" \
-  "${SHARED_FILES_DIR}/.tmp/viewer-2"
-log "Seeded shared/files from cluster-data/"
+export SHARED_DIR="${TEST_DIR}/shared"
+mkdir -p "${SHARED_DIR}"
+cp -r "${REPO_ROOT}/cluster-data/shared/." "${SHARED_DIR}/"
+log "Seeded shared/ from cluster-data/ (files/ + tmp/)"
 
 # ------------------------------------------------------------------------------
 # Keycloak database — rebuilt from realm.json on every run.
@@ -232,7 +225,7 @@ ensure_runtime_writable "${VIEWER_NODE_1_LOGS}"
 ensure_runtime_writable "${VIEWER_NODE_2_LOGS}"
 ensure_runtime_writable "${VIEWER_NODE_1_ERROR_REPORTS}"
 ensure_runtime_writable "${VIEWER_NODE_2_ERROR_REPORTS}"
-ensure_runtime_writable "${SHARED_FILES_DIR}"
+ensure_runtime_writable "${SHARED_DIR}"
 ensure_runtime_writable "${KEYCLOAK_DATA}"
 
 # ------------------------------------------------------------------------------
@@ -244,7 +237,7 @@ cat > "${TEST_DIR}/delete.sh" <<DELETESCRIPT
 export KEYCLOAK_DATA="${KEYCLOAK_DATA}"
 export EDITOR_OMNISCOPE_SERVER="${EDITOR_OMNISCOPE_SERVER}"
 export VIEWER_OMNISCOPE_SERVER="${VIEWER_OMNISCOPE_SERVER}"
-export SHARED_FILES_DIR="${SHARED_FILES_DIR}"
+export SHARED_DIR="${SHARED_DIR}"
 export VIEWER_NODE_1_LOGS="${VIEWER_NODE_1_LOGS}"
 export VIEWER_NODE_2_LOGS="${VIEWER_NODE_2_LOGS}"
 export VIEWER_NODE_1_ERROR_REPORTS="${VIEWER_NODE_1_ERROR_REPORTS}"
